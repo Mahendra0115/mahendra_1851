@@ -1,0 +1,250 @@
+{
+  "info": {
+    "_postman_id": "8a19d50a-3ca6-42c8-8d5a-4a5f7a2bb151",
+    "name": "Mahendra 1851 - Day 1 Required APIs",
+    "description": "Simple collection for testing required Day 1 APIs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Signup Brand User",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"brand{{$timestamp}}@email.com\",\n  \"password\": \"brand123\",\n  \"fullName\": \"Brand User\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/signup",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "signup"]
+        },
+        "description": "POST API test karni hai.\n\nURL:\n{{baseUrl}}/users/signup\n\nBody -> raw -> JSON:\n{\n  \"email\": \"brand{{$timestamp}}@email.com\",\n  \"password\": \"brand123\",\n  \"fullName\": \"Brand User\"\n}\n\nExpected JSON Response:\n{\n  \"accessToken\": \"jwt-token-here\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"brand1234567890@email.com\",\n    \"role\": \"BRAND\",\n    \"fullName\": \"Brand User\",\n    \"createdAt\": \"date-time\",\n    \"updatedAt\": \"date-time\"\n  }\n}"
+      },
+      "response": [
+        {
+          "name": "Sample Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"brand{{$timestamp}}@email.com\",\n  \"password\": \"brand123\",\n  \"fullName\": \"Brand User\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "signup"]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"accessToken\": \"jwt-token-here\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"brand1234567890@email.com\",\n    \"role\": \"BRAND\",\n    \"fullName\": \"Brand User\",\n    \"createdAt\": \"date-time\",\n    \"updatedAt\": \"date-time\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "02 - Login Admin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "login"]
+        },
+        "description": "POST API test karni hai.\n\nURL:\n{{baseUrl}}/users/login\n\nBody -> raw -> JSON:\n{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}\n\nEnvironment values:\nadminEmail = admin@email.com\nadminPassword = admin\n\nExpected JSON Response:\n{\n  \"accessToken\": \"jwt-token-here\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"admin@email.com\",\n    \"role\": \"ADMIN\",\n    \"fullName\": \"Admin\",\n    \"createdAt\": \"date-time\",\n    \"updatedAt\": \"date-time\"\n  }\n}\n\nNote: Response ka accessToken copy karke environment me adminAccessToken me paste karo. Uske baad API 03 aur 04 run hogi."
+      },
+      "response": [
+        {
+          "name": "Sample Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "login"]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"accessToken\": \"jwt-token-here\",\n  \"user\": {\n    \"id\": 1,\n    \"email\": \"admin@email.com\",\n    \"role\": \"ADMIN\",\n    \"fullName\": \"Admin\",\n    \"createdAt\": \"date-time\",\n    \"updatedAt\": \"date-time\"\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "03 - Admin Creates Brand User",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin-created-brand{{$timestamp}}@email.com\",\n  \"password\": \"brand123\",\n  \"fullName\": \"Admin Created Brand\",\n  \"role\": \"BRAND\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/admin/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "admin", "users"]
+        },
+        "description": "POST API test karni hai.\n\nURL:\n{{baseUrl}}/users/admin/users\n\nAuth:\nBearer Token = {{adminAccessToken}}\n\nBody -> raw -> JSON:\n{\n  \"email\": \"admin-created-brand{{$timestamp}}@email.com\",\n  \"password\": \"brand123\",\n  \"fullName\": \"Admin Created Brand\",\n  \"role\": \"BRAND\"\n}\n\nExpected JSON Response:\n{\n  \"id\": 2,\n  \"email\": \"admin-created-brand1234567890@email.com\",\n  \"role\": \"BRAND\",\n  \"fullName\": \"Admin Created Brand\",\n  \"createdAt\": \"date-time\",\n  \"updatedAt\": \"date-time\"\n}"
+      },
+      "response": [
+        {
+          "name": "Sample Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin-created-brand{{$timestamp}}@email.com\",\n  \"password\": \"brand123\",\n  \"fullName\": \"Admin Created Brand\",\n  \"role\": \"BRAND\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "admin", "users"]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 2,\n  \"email\": \"admin-created-brand1234567890@email.com\",\n  \"role\": \"BRAND\",\n  \"fullName\": \"Admin Created Brand\",\n  \"createdAt\": \"date-time\",\n  \"updatedAt\": \"date-time\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "04 - Admin Creates Admin User",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin-created-admin{{$timestamp}}@email.com\",\n  \"password\": \"admin123\",\n  \"fullName\": \"Admin Created Admin\",\n  \"role\": \"ADMIN\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/admin/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "admin", "users"]
+        },
+        "description": "POST API test karni hai.\n\nURL:\n{{baseUrl}}/users/admin/users\n\nAuth:\nBearer Token = {{adminAccessToken}}\n\nBody -> raw -> JSON:\n{\n  \"email\": \"admin-created-admin{{$timestamp}}@email.com\",\n  \"password\": \"admin123\",\n  \"fullName\": \"Admin Created Admin\",\n  \"role\": \"ADMIN\"\n}\n\nExpected JSON Response:\n{\n  \"id\": 3,\n  \"email\": \"admin-created-admin1234567890@email.com\",\n  \"role\": \"ADMIN\",\n  \"fullName\": \"Admin Created Admin\",\n  \"createdAt\": \"date-time\",\n  \"updatedAt\": \"date-time\"\n}"
+      },
+      "response": [
+        {
+          "name": "Sample Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin-created-admin{{$timestamp}}@email.com\",\n  \"password\": \"admin123\",\n  \"fullName\": \"Admin Created Admin\",\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "admin", "users"]
+            }
+          },
+          "status": "Created",
+          "code": 201,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"id\": 3,\n  \"email\": \"admin-created-admin1234567890@email.com\",\n  \"role\": \"ADMIN\",\n  \"fullName\": \"Admin Created Admin\",\n  \"createdAt\": \"date-time\",\n  \"updatedAt\": \"date-time\"\n}"
+        }
+      ]
+    }
+  ]
+}
