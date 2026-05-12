@@ -1,6 +1,6 @@
 # mahendra_1851 API Postman Testing Guide
 
-Ye README Postman mein API test karne ke liye simple format mein hai.
+Ye README Postman mein API test karne ke liye numbered order mein hai.
 
 ## Import files
 
@@ -15,6 +15,7 @@ Import ke baad environment dropdown se `mahendra_1851 Local` select karein.
 
 ```bash
 npm install
+npm run migration:run
 npm run start:dev
 ```
 
@@ -34,17 +35,19 @@ Role: ADMIN
 
 ## Test order
 
-1. `Health / GET /`
-2. `Auth / POST /users/signup - Brand Signup`
-3. `Auth / POST /users/login - Brand Login`
-4. `Auth / POST /users/login - Seed Admin Login`
-5. `Admin / POST /users/admin/users - Create User`
+1. `01 Health / 01 GET /`
+2. `02 Auth / 02 POST /users/signup - Brand Signup`
+3. `02 Auth / 03 POST /users/login - Brand Login`
+4. `02 Auth / 04 POST /users/login - Seed Admin Login`
+5. `03 Admin Users / 05 POST /users/admin/users - Create User`
+6. `04 Admin Brands / 06 POST /brands - Create Brand`
+7. `04 Admin Brands / 07 GET /brands - List All Brands`
+8. `04 Admin Brands / 08 PATCH /brands/:id - Update Brand`
+9. `04 Admin Brands / 09 DELETE /brands/:id - Delete Brand`
 
 ---
 
-### 1. Health Check
-
-Tests backend server is running or not.
+### 01. Health Check
 
 ```http
 GET {{baseUrl}}/
@@ -64,9 +67,9 @@ Hello World!
 
 ---
 
-### 2. Brand Signup
+### 02. Brand Signup
 
-Creates a normal `BRAND` user. This API saves user data in database and returns JWT token.
+Creates a normal `BRAND` user.
 
 ```http
 POST {{baseUrl}}/users/signup
@@ -83,39 +86,11 @@ Body:
 }
 ```
 
-Example body:
-
-```json
-{
-  "email": "brand1@example.com",
-  "password": "brand1234",
-  "fullName": "Brand User"
-}
-```
-
-Expected output:
-
-```json
-{
-  "accessToken": "jwt-token-here",
-  "user": {
-    "id": 1,
-    "email": "brand1@example.com",
-    "role": "BRAND",
-    "fullName": "Brand User",
-    "createdAt": "2026-05-11T10:00:00.000Z",
-    "updatedAt": "2026-05-11T10:00:00.000Z"
-  }
-}
-```
-
 Note: Postman automatically `accessToken` environment variable mein save karega.
 
 ---
 
-### 3. Brand Login
-
-Tests login for already created `BRAND` user. If email and password are correct, API returns JWT token.
+### 03. Brand Login
 
 ```http
 POST {{baseUrl}}/users/login
@@ -131,38 +106,13 @@ Body:
 }
 ```
 
-Example body:
-
-```json
-{
-  "email": "brand1@example.com",
-  "password": "brand1234"
-}
-```
-
-Expected output:
-
-```json
-{
-  "accessToken": "jwt-token-here",
-  "user": {
-    "id": 1,
-    "email": "brand1@example.com",
-    "role": "BRAND",
-    "fullName": "Brand User",
-    "createdAt": "2026-05-11T10:00:00.000Z",
-    "updatedAt": "2026-05-11T10:00:00.000Z"
-  }
-}
-```
-
 Note: Ye token normal brand user ka token hai, admin token nahi.
 
 ---
 
-### 4. Seed Admin Login
+### 04. Seed Admin Login
 
-Tests login for default admin user. Admin token protected admin APIs ke liye required hai.
+Admin token protected admin APIs ke liye required hai.
 
 ```http
 POST {{baseUrl}}/users/login
@@ -178,38 +128,13 @@ Body:
 }
 ```
 
-Example body:
-
-```json
-{
-  "email": "admin@email.com",
-  "password": "admin"
-}
-```
-
-Expected output:
-
-```json
-{
-  "accessToken": "admin-jwt-token-here",
-  "user": {
-    "id": 2,
-    "email": "admin@email.com",
-    "role": "ADMIN",
-    "fullName": "Admin",
-    "createdAt": "2026-05-11T10:00:00.000Z",
-    "updatedAt": "2026-05-11T10:00:00.000Z"
-  }
-}
-```
-
 Note: Postman automatically `adminAccessToken` environment variable mein save karega.
 
 ---
 
-### 5. Admin Create User
+### 05. Admin Create User
 
-Creates a new user by admin. This API is protected. Only `ADMIN` role token can access it.
+Only `ADMIN` role token can access it.
 
 ```http
 POST {{baseUrl}}/users/admin/users
@@ -228,14 +153,27 @@ Body:
 }
 ```
 
-Example body:
+Expected output mein password return nahi hota.
+
+---
+
+### 06. Admin Create Brand
+
+Only `ADMIN` role token can create brand.
+
+```http
+POST {{baseUrl}}/brands
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+```
+
+Body:
 
 ```json
 {
-  "email": "created-by-admin@example.com",
-  "password": "user1234",
-  "fullName": "Created By Admin",
-  "role": "BRAND"
+  "name": "{{brandName}}",
+  "description": "{{brandDescription}}",
+  "logoUrl": "{{brandLogoUrl}}"
 }
 ```
 
@@ -243,25 +181,50 @@ Expected output:
 
 ```json
 {
-  "id": 3,
-  "email": "created-by-admin@example.com",
-  "role": "BRAND",
-  "fullName": "Created By Admin",
+  "id": 1,
+  "name": "Nike",
+  "description": "Sportswear brand",
+  "logoUrl": "https://example.com/nike-logo.png",
+  "createdById": 1,
   "createdAt": "2026-05-11T10:00:00.000Z",
   "updatedAt": "2026-05-11T10:00:00.000Z"
 }
 ```
 
-Note: Password response mein return nahi hota. `role` value `ADMIN` ya `BRAND` ho sakti hai.
+Note: Postman automatically `brandId` environment variable mein save karega.
 
 ---
 
-### 6. Duplicate Email - Error Case
-
-Tests duplicate email. Same email se signup ya admin create user dobara call karne par user create nahi hoga.
+### 07. Admin List All Brands
 
 ```http
-POST {{baseUrl}}/users/signup
+GET {{baseUrl}}/brands
+Authorization: Bearer {{adminAccessToken}}
+```
+
+Expected output:
+
+```json
+[
+  {
+    "id": 1,
+    "name": "Nike",
+    "description": "Sportswear brand",
+    "logoUrl": "https://example.com/nike-logo.png",
+    "createdById": 1,
+    "createdAt": "2026-05-11T10:00:00.000Z",
+    "updatedAt": "2026-05-11T10:00:00.000Z"
+  }
+]
+```
+
+---
+
+### 08. Admin Update Brand
+
+```http
+PATCH {{baseUrl}}/brands/{{brandId}}
+Authorization: Bearer {{adminAccessToken}}
 Content-Type: application/json
 ```
 
@@ -269,113 +232,26 @@ Body:
 
 ```json
 {
-  "email": "{{brandEmail}}",
-  "password": "{{brandPassword}}",
-  "fullName": "{{brandFullName}}"
-}
-```
-
-Expected output:
-
-```json
-{
-  "message": "Email already exists",
-  "error": "Conflict",
-  "statusCode": 409
+  "name": "{{updatedBrandName}}",
+  "description": "{{updatedBrandDescription}}",
+  "logoUrl": "{{updatedBrandLogoUrl}}"
 }
 ```
 
 ---
 
-### 7. Wrong Login - Error Case
-
-Tests wrong email or password. Login should fail and token should not be generated.
+### 09. Admin Delete Brand
 
 ```http
-POST {{baseUrl}}/users/login
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "wrong@example.com",
-  "password": "wrongpass"
-}
+DELETE {{baseUrl}}/brands/{{brandId}}
+Authorization: Bearer {{adminAccessToken}}
 ```
 
 Expected output:
 
 ```json
 {
-  "message": "Invalid email or password",
-  "error": "Unauthorized",
-  "statusCode": 401
-}
-```
-
----
-
-### 8. Admin Create User Without Token - Error Case
-
-Tests protected admin API without token. User should not be created.
-
-```http
-POST {{baseUrl}}/users/admin/users
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{newUserEmail}}",
-  "password": "{{newUserPassword}}",
-  "fullName": "{{newUserFullName}}",
-  "role": "{{newUserRole}}"
-}
-```
-
-Expected output:
-
-```json
-{
-  "message": "Unauthorized",
-  "statusCode": 401
-}
-```
-
----
-
-### 9. Admin Create User With Brand Token - Error Case
-
-Tests admin API using normal brand token. User should not be created because brand user is not admin.
-
-```http
-POST {{baseUrl}}/users/admin/users
-Authorization: Bearer {{accessToken}}
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{newUserEmail}}",
-  "password": "{{newUserPassword}}",
-  "fullName": "{{newUserFullName}}",
-  "role": "{{newUserRole}}"
-}
-```
-
-Expected output:
-
-```json
-{
-  "message": "Forbidden resource",
-  "error": "Forbidden",
-  "statusCode": 403
+  "message": "Brand deleted successfully"
 }
 ```
 
@@ -384,5 +260,6 @@ Expected output:
 - `{{baseUrl}}` default value: `http://localhost:3000`
 - `{{accessToken}}` brand signup/login ke baad auto-save hota hai.
 - `{{adminAccessToken}}` admin login ke baad auto-save hota hai.
-- Duplicate email aaye to environment mein email value change karke request dobara run karein.
-- Valid role values: `ADMIN`, `BRAND`
+- `{{brandId}}` create brand ke baad auto-save hota hai.
+- Admin-only APIs normal brand token se run karne par `403 Forbidden` return karengi.
+- Migration run karna required hai because `synchronize` false hai.

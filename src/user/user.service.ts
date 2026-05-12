@@ -76,6 +76,7 @@ export class UserService implements OnModuleInit {
       ...createUserDto,
       password: await bcrypt.hash(createUserDto.password, 10),
       role: createUserDto.role || UserRole.BRAND,
+      brandId: createUserDto.brandId ?? null,
     });
 
     return this.userRepository.save(user);
@@ -87,6 +88,7 @@ export class UserService implements OnModuleInit {
         sub: user.id,
         email: user.email,
         role: user.role,
+        brandId: user.brandId,
       }),
       user: this.serializeUser(user),
     };
@@ -97,6 +99,7 @@ export class UserService implements OnModuleInit {
       id: user.id,
       email: user.email,
       role: user.role,
+      brandId: user.brandId,
       fullName: user.fullName,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

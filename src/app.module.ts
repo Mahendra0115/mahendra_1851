@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { BrandModule } from './brand/brand.module';
 import { UserModule } from './user/user.module';
 
 @Module({
@@ -16,10 +17,12 @@ import { UserModule } from './user/user.module';
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'mahendra_1851',
       autoLoadEntities: true,
-      synchronize: true,
+      synchronize: false,
+      migrations: [__dirname + '/migrations/*{.ts,.js}'],
       // logging: true,
     }),
     UserModule,
+    BrandModule,
   ],
   controllers: [AppController],
   providers: [AppService],

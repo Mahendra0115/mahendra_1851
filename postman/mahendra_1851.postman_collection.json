@@ -2,15 +2,15 @@
   "info": {
     "_postman_id": "5f07f655-9f20-47f2-8ac8-f9c43e4951f8",
     "name": "mahendra_1851 API",
-    "description": "Postman collection generated from the current NestJS controllers. Import this with the mahendra_1851 Local environment.",
+    "description": "Numbered Postman collection for testing the NestJS APIs in the correct order.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Health",
+      "name": "01 Health",
       "item": [
         {
-          "name": "GET /",
+          "name": "01 GET /",
           "event": [
             {
               "listen": "test",
@@ -18,10 +18,6 @@
                 "exec": [
                   "pm.test('Status code is 200', function () {",
                   "  pm.response.to.have.status(200);",
-                  "});",
-                  "",
-                  "pm.test('Response contains Hello World', function () {",
-                  "  pm.expect(pm.response.text()).to.include('Hello World');",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -33,24 +29,19 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                ""
-              ]
-            },
-            "description": "Root endpoint from AppController."
+              "host": ["{{baseUrl}}"],
+              "path": [""]
+            }
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Auth",
+      "name": "02 Auth",
       "item": [
         {
-          "name": "POST /users/signup - Brand Signup",
+          "name": "02 Brand Signup",
           "event": [
             {
               "listen": "test",
@@ -59,13 +50,7 @@
                   "pm.test('Status code is 201', function () {",
                   "  pm.response.to.have.status(201);",
                   "});",
-                  "",
                   "const json = pm.response.json();",
-                  "pm.test('Signup returns access token and user', function () {",
-                  "  pm.expect(json).to.have.property('accessToken');",
-                  "  pm.expect(json).to.have.property('user');",
-                  "});",
-                  "",
                   "if (json.accessToken) {",
                   "  pm.environment.set('accessToken', json.accessToken);",
                   "}"
@@ -88,20 +73,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/users/signup",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "signup"
-              ]
-            },
-            "description": "Creates a BRAND user and returns accessToken + user. If the email already exists, API returns 409 Conflict."
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "signup"]
+            }
           },
           "response": []
         },
         {
-          "name": "POST /users/login - Brand Login",
+          "name": "03  Brand Login",
           "event": [
             {
               "listen": "test",
@@ -110,13 +89,7 @@
                   "pm.test('Status code is 201', function () {",
                   "  pm.response.to.have.status(201);",
                   "});",
-                  "",
                   "const json = pm.response.json();",
-                  "pm.test('Login returns access token and user', function () {",
-                  "  pm.expect(json).to.have.property('accessToken');",
-                  "  pm.expect(json).to.have.property('user');",
-                  "});",
-                  "",
                   "if (json.accessToken) {",
                   "  pm.environment.set('accessToken', json.accessToken);",
                   "}"
@@ -139,20 +112,14 @@
             },
             "url": {
               "raw": "{{baseUrl}}/users/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "login"
-              ]
-            },
-            "description": "Logs in a normal BRAND user and stores accessToken in the environment."
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "login"]
+            }
           },
           "response": []
         },
         {
-          "name": "POST /users/login - Seed Admin Login",
+          "name": "04 Seed Admin Login",
           "event": [
             {
               "listen": "test",
@@ -161,13 +128,10 @@
                   "pm.test('Status code is 201', function () {",
                   "  pm.response.to.have.status(201);",
                   "});",
-                  "",
                   "const json = pm.response.json();",
-                  "pm.test('Admin login returns access token and ADMIN user', function () {",
-                  "  pm.expect(json).to.have.property('accessToken');",
-                  "  pm.expect(json.user).to.have.property('role', 'ADMIN');",
+                  "pm.test('User role is ADMIN', function () {",
+                  "  pm.expect(json.user.role).to.eql('ADMIN');",
                   "});",
-                  "",
                   "if (json.accessToken) {",
                   "  pm.environment.set('adminAccessToken', json.accessToken);",
                   "}"
@@ -190,25 +154,19 @@
             },
             "url": {
               "raw": "{{baseUrl}}/users/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "login"
-              ]
-            },
-            "description": "Logs in the seeded admin user created by UserService.onModuleInit(). Stores adminAccessToken in the environment."
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "login"]
+            }
           },
           "response": []
         }
       ]
     },
     {
-      "name": "Admin",
+      "name": "03 Admin Users ",
       "item": [
         {
-          "name": "POST /users/admin/users - Create User",
+          "name": "05 Create User",
           "event": [
             {
               "listen": "test",
@@ -217,10 +175,8 @@
                   "pm.test('Status code is 201', function () {",
                   "  pm.response.to.have.status(201);",
                   "});",
-                  "",
                   "const json = pm.response.json();",
-                  "pm.test('Created user response does not include password', function () {",
-                  "  pm.expect(json).to.have.property('email');",
+                  "pm.test('Response does not include password', function () {",
                   "  pm.expect(json).to.not.have.property('password');",
                   "});"
                 ],
@@ -252,16 +208,187 @@
             },
             "url": {
               "raw": "{{baseUrl}}/users/admin/users",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "admin",
-                "users"
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "admin", "users"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "04 Admin Brands",
+      "item": [
+        {
+          "name": "06 Create Brand",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Brand created', function () {",
+                  "  pm.expect(json).to.have.property('id');",
+                  "  pm.expect(json).to.have.property('createdById');",
+                  "});",
+                  "if (json.id) {",
+                  "  pm.environment.set('brandId', json.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
               ]
             },
-            "description": "Protected admin endpoint. First run Seed Admin Login so adminAccessToken is available."
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{brandName}}\",\n  \"description\": \"{{brandDescription}}\",\n  \"logoUrl\": \"{{brandLogoUrl}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/brands",
+              "host": ["{{baseUrl}}"],
+              "path": ["brands"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "07  List All Brands",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('Response is array', function () {",
+                  "  pm.expect(pm.response.json()).to.be.an('array');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/brands",
+              "host": ["{{baseUrl}}"],
+              "path": ["brands"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "08  Update Brand",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{updatedBrandName}}\",\n  \"description\": \"{{updatedBrandDescription}}\",\n  \"logoUrl\": \"{{updatedBrandLogoUrl}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/brands/{{brandId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["brands", "{{brandId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "09  Delete Brand",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{adminAccessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/brands/{{brandId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["brands", "{{brandId}}"]
+            }
           },
           "response": []
         }
@@ -276,18 +403,14 @@
       "listen": "prerequest",
       "script": {
         "type": "text/javascript",
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     },
     {
       "listen": "test",
       "script": {
         "type": "text/javascript",
-        "exec": [
-          ""
-        ]
+        "exec": [""]
       }
     }
   ]

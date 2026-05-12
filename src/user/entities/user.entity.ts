@@ -1,5 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum UserRole {
   ADMIN = 'ADMIN',
@@ -23,6 +29,9 @@ export class User {
 
   @Column({ nullable: true })
   fullName: string;
+
+  @Column({ type: 'int', nullable: true })
+  brandId: number | null;
 
   @CreateDateColumn()
   createdAt: Date;
