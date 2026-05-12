@@ -1,6 +1,8 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
   OnModuleInit,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
+import { Brand } from '../brand/entities/brand.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { User, UserRole } from './entities/user.entity';
@@ -17,6 +20,8 @@ export class UserService implements OnModuleInit {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Brand)
+    private readonly brandRepository: Repository<Brand>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -64,6 +69,9 @@ export class UserService implements OnModuleInit {
   }
 
   private async createUser(createUserDto: CreateUserDto) {
+    const role = createUserDto.role || UserRole.BRAND;
+    const brandId = await this.resolveBrandId(role, createUserDto.brandId);
+
     const existingUser = await this.userRepository.findOne({
       where: { email: createUserDto.email },
     });
@@ -75,11 +83,33 @@ export class UserService implements OnModuleInit {
     const user = this.userRepository.create({
       ...createUserDto,
       password: await bcrypt.hash(createUserDto.password, 10),
-      role: createUserDto.role || UserRole.BRAND,
-      brandId: createUserDto.brandId ?? null,
+      role,
+      brandId,
     });
 
     return this.userRepository.save(user);
+  }
+
+  private async resolveBrandId(role: UserRole, brandId?: number) {
+    if (role === UserRole.ADMIN) {
+      return null;
+    }
+
+    const parsedBrandId = Number(brandId);
+
+    if (!Number.isInteger(parsedBrandId)) {
+      throw new BadRequestException('brandId is required for BRAND user');
+    }
+
+    const brand = await this.brandRepository.findOne({
+      where: { id: parsedBrandId },
+    });
+
+    if (!brand) {
+      throw new NotFoundException('Brand not found');
+    }
+
+    return parsedBrandId;
   }
 
   private buildAuthResponse(user: User) {

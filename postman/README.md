@@ -35,15 +35,15 @@ Role: ADMIN
 
 ## Test order
 
-1. `01 Health / 01 GET /`
-2. `02 Auth / 02 POST /users/signup - Brand Signup`
-3. `02 Auth / 03 POST /users/login - Brand Login`
-4. `02 Auth / 04 POST /users/login - Seed Admin Login`
-5. `03 Admin Users / 05 POST /users/admin/users - Create User`
-6. `04 Admin Brands / 06 POST /brands - Create Brand`
-7. `04 Admin Brands / 07 GET /brands - List All Brands`
-8. `04 Admin Brands / 08 PATCH /brands/:id - Update Brand`
-9. `04 Admin Brands / 09 DELETE /brands/:id - Delete Brand`
+1. `01 GET / - Health`
+2. `02 POST /users/login - Seed Admin Login`
+3. `03 POST /brands - Create Brand`
+4. `04 POST /users/signup - Brand Signup`
+5. `05 POST /users/login - Brand Login`
+6. `06 POST /users/admin/users - Create User`
+7. `07 GET /brands - List All Brands`
+8. `08 PATCH /brands/:id - Update Brand`
+9. `09 DELETE /brands/:id - Delete Brand`
 
 ---
 
@@ -67,50 +67,7 @@ Hello World!
 
 ---
 
-### 02. Brand Signup
-
-Creates a normal `BRAND` user.
-
-```http
-POST {{baseUrl}}/users/signup
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{brandEmail}}",
-  "password": "{{brandPassword}}",
-  "fullName": "{{brandFullName}}"
-}
-```
-
-Note: Postman automatically `accessToken` environment variable mein save karega.
-
----
-
-### 03. Brand Login
-
-```http
-POST {{baseUrl}}/users/login
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{brandEmail}}",
-  "password": "{{brandPassword}}"
-}
-```
-
-Note: Ye token normal brand user ka token hai, admin token nahi.
-
----
-
-### 04. Seed Admin Login
+### 02. Seed Admin Login
 
 Admin token protected admin APIs ke liye required hai.
 
@@ -128,36 +85,11 @@ Body:
 }
 ```
 
-Note: Postman automatically `adminAccessToken` environment variable mein save karega.
+Note: Response me admin user ka `brandId` null aana chahiye. Postman automatically `adminAccessToken` environment variable mein save karega.
 
 ---
 
-### 05. Admin Create User
-
-Only `ADMIN` role token can access it.
-
-```http
-POST {{baseUrl}}/users/admin/users
-Authorization: Bearer {{adminAccessToken}}
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{newUserEmail}}",
-  "password": "{{newUserPassword}}",
-  "fullName": "{{newUserFullName}}",
-  "role": "{{newUserRole}}"
-}
-```
-
-Expected output mein password return nahi hota.
-
----
-
-### 06. Admin Create Brand
+### 03. Admin Create Brand
 
 Only `ADMIN` role token can create brand.
 
@@ -177,21 +109,77 @@ Body:
 }
 ```
 
-Expected output:
+Note: Postman automatically `brandId` environment variable mein save karega.
+
+---
+
+### 04. Brand Signup
+
+Creates a normal `BRAND` user. `brandId` valid existing brand id hona required hai.
+
+```http
+POST {{baseUrl}}/users/signup
+Content-Type: application/json
+```
+
+Body:
 
 ```json
 {
-  "id": 1,
-  "name": "Nike",
-  "description": "Sportswear brand",
-  "logoUrl": "https://example.com/nike-logo.png",
-  "createdById": 1,
-  "createdAt": "2026-05-11T10:00:00.000Z",
-  "updatedAt": "2026-05-11T10:00:00.000Z"
+  "email": "{{brandEmail}}",
+  "password": "{{brandPassword}}",
+  "fullName": "{{brandFullName}}",
+  "brandId": {{brandId}}
 }
 ```
 
-Note: Postman automatically `brandId` environment variable mein save karega.
+Note: Postman automatically `accessToken` environment variable mein save karega.
+
+---
+
+### 05. Brand Login
+
+```http
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "email": "{{brandEmail}}",
+  "password": "{{brandPassword}}"
+}
+```
+
+Note: Ye token normal brand user ka token hai, admin token nahi.
+
+---
+
+### 06. Admin Create User
+
+Only `ADMIN` role token can access it.
+
+```http
+POST {{baseUrl}}/users/admin/users
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "email": "{{newUserEmail}}",
+  "password": "{{newUserPassword}}",
+  "fullName": "{{newUserFullName}}",
+  "role": "{{newUserRole}}",
+  "brandId": {{brandId}}
+}
+```
+
+Expected output mein password return nahi hota.
 
 ---
 
