@@ -185,7 +185,7 @@ Expected output mein password return nahi hota.
 
 ---
 
-### 07. Admin List All Brands
+### 06. Admin List All Brands
 
 ```http
 GET {{baseUrl}}/brands
@@ -210,7 +210,7 @@ Expected output:
 
 ---
 
-### 08. Admin Update Brand
+### 07. Admin Update Brand
 
 ```http
 PATCH {{baseUrl}}/brands/{{brandId}}
@@ -230,7 +230,7 @@ Body:
 
 ---
 
-### 09. Admin Delete Brand
+### 08. Admin Delete Brand
 
 ```http
 DELETE {{baseUrl}}/brands/{{brandId}}
