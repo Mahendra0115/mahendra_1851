@@ -36,14 +36,13 @@ Role: ADMIN
 ## Test order
 
 1. `01 Health / 01 GET /`
-2. `02 Auth / 02 POST /users/signup - Brand Signup`
-3. `02 Auth / 03 POST /users/login - Brand Login`
-4. `02 Auth / 04 POST /users/login - Seed Admin Login`
-5. `03 Admin Users / 05 POST /users/admin/users - Create User`
-6. `04 Admin Brands / 06 POST /brands - Create Brand`
-7. `04 Admin Brands / 07 GET /brands - List All Brands`
-8. `04 Admin Brands / 08 PATCH /brands/:id - Update Brand`
-9. `04 Admin Brands / 09 DELETE /brands/:id - Delete Brand`
+2. `02 Auth / 02 POST /users/login - Seed Admin Login`
+3. `03 Admin Users / 03 POST /users/admin/users - Create User`
+4. `02 Auth / 04 POST /users/login - Brand Login`
+5. `04 Admin Brands / 05 POST /brands - Create Brand`
+6. `04 Admin Brands / 06 GET /brands - List All Brands`
+7. `04 Admin Brands / 07 PATCH /brands/:id - Update Brand`
+8. `04 Admin Brands / 08 DELETE /brands/:id - Delete Brand`
 
 ---
 
@@ -67,50 +66,7 @@ Hello World!
 
 ---
 
-### 02. Brand Signup
-
-Creates a normal `BRAND` user.
-
-```http
-POST {{baseUrl}}/users/signup
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{brandEmail}}",
-  "password": "{{brandPassword}}",
-  "fullName": "{{brandFullName}}"
-}
-```
-
-Note: Postman automatically `accessToken` environment variable mein save karega.
-
----
-
-### 03. Brand Login
-
-```http
-POST {{baseUrl}}/users/login
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{brandEmail}}",
-  "password": "{{brandPassword}}"
-}
-```
-
-Note: Ye token normal brand user ka token hai, admin token nahi.
-
----
-
-### 04. Seed Admin Login
+### 02. Seed Admin Login
 
 Admin token protected admin APIs ke liye required hai.
 
@@ -132,7 +88,7 @@ Note: Postman automatically `adminAccessToken` environment variable mein save ka
 
 ---
 
-### 05. Admin Create User
+### 03. Admin Create User
 
 Only `ADMIN` role token can access it.
 
@@ -157,7 +113,29 @@ Expected output mein password return nahi hota.
 
 ---
 
-### 06. Admin Create Brand
+### 04. Brand Login
+
+Admin-created brand user login ke liye.
+
+```http
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "email": "{{newUserEmail}}",
+  "password": "{{newUserPassword}}"
+}
+```
+
+Note: Ye token normal brand user ka token hai, admin token nahi.
+
+---
+
+### 05. Admin Create Brand
 
 Only `ADMIN` role token can create brand.
 
@@ -195,7 +173,7 @@ Note: Postman automatically `brandId` environment variable mein save karega.
 
 ---
 
-### 07. Admin List All Brands
+### 06. Admin List All Brands
 
 ```http
 GET {{baseUrl}}/brands
@@ -220,7 +198,7 @@ Expected output:
 
 ---
 
-### 08. Admin Update Brand
+### 07. Admin Update Brand
 
 ```http
 PATCH {{baseUrl}}/brands/{{brandId}}
@@ -240,7 +218,7 @@ Body:
 
 ---
 
-### 09. Admin Delete Brand
+### 08. Admin Delete Brand
 
 ```http
 DELETE {{baseUrl}}/brands/{{brandId}}
@@ -258,7 +236,7 @@ Expected output:
 ## Important notes
 
 - `{{baseUrl}}` default value: `http://localhost:3000`
-- `{{accessToken}}` brand signup/login ke baad auto-save hota hai.
+- `{{accessToken}}` admin-created brand user login ke baad auto-save hota hai.
 - `{{adminAccessToken}}` admin login ke baad auto-save hota hai.
 - `{{brandId}}` create brand ke baad auto-save hota hai.
 - Admin-only APIs normal brand token se run karne par `403 Forbidden` return karengi.
