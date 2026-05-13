@@ -9,6 +9,11 @@ import {
 } from 'typeorm';
 import { User } from '../../user/entities/user.entity';
 
+export enum BrandStatus {
+  APPROVED = 'APPROVED',
+  DISAPPROVED = 'DISAPPROVED',
+}
+
 @Entity('brands')
 export class Brand {
   @PrimaryGeneratedColumn()
@@ -22,6 +27,13 @@ export class Brand {
 
   @Column()
   logoUrl: string;
+
+  @Column({
+    type: 'enum',
+    enum: BrandStatus,
+    default: BrandStatus.DISAPPROVED,
+  })
+  status: BrandStatus;
 
   @ManyToOne(() => User, { nullable: false, onDelete: 'RESTRICT' })
   @JoinColumn({ name: 'createdById' })
