@@ -129,7 +129,7 @@
       "response": []
     },
     {
-      "name": "04 POST /users/signup - Brand Signup",
+      "name": "04 POST /users/admin/users - Create Brand User",
       "event": [
         {
           "listen": "test",
@@ -138,20 +138,30 @@
               "pm.test('Status code is 201', function () {",
               "  pm.response.to.have.status(201);",
               "});",
-              "const json = pm.response.json();",
               "pm.test('Brand user has valid brandId', function () {",
-              "  pm.expect(json.user.role).to.eql('BRAND');",
-              "  pm.expect(json.user.brandId).to.eql(Number(pm.environment.get('brandId')));",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.role).to.eql('BRAND');",
+              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
               "});",
-              "if (json.accessToken) {",
-              "  pm.environment.set('accessToken', json.accessToken);",
-              "}"
+              "pm.test('Response does not include password', function () {",
+              "  pm.expect(pm.response.json()).to.not.have.property('password');",
+              "});"
             ],
             "type": "text/javascript"
           }
         }
       ],
       "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
         "method": "POST",
         "header": [
           {
@@ -161,12 +171,12 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"{{brandEmail}}\",\n  \"password\": \"{{brandPassword}}\",\n  \"fullName\": \"{{brandFullName}}\",\n  \"brandId\": {{brandId}}\n}"
+          "raw": "{\n  \"email\": \"{{brandEmail}}\",\n  \"password\": \"{{brandPassword}}\",\n  \"fullName\": \"{{brandFullName}}\",\n  \"role\": \"BRAND\",\n  \"brandId\": {{brandId}}\n}"
         },
         "url": {
-          "raw": "{{baseUrl}}/users/signup",
+          "raw": "{{baseUrl}}/users/admin/users",
           "host": ["{{baseUrl}}"],
-          "path": ["users", "signup"]
+          "path": ["users", "admin", "users"]
         }
       },
       "response": []

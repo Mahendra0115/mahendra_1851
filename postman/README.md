@@ -38,7 +38,7 @@ Role: ADMIN
 1. `01 GET / - Health`
 2. `02 POST /users/login - Seed Admin Login`
 3. `03 POST /brands - Create Brand`
-4. `04 POST /users/signup - Brand Signup`
+4. `04 POST /users/admin/users - Create Brand User`
 5. `05 POST /users/login - Brand Login`
 6. `06 POST /users/admin/users - Create User`
 7. `07 GET /brands - List All Brands`
@@ -113,12 +113,13 @@ Note: Postman automatically `brandId` environment variable mein save karega.
 
 ---
 
-### 04. Brand Signup
+### 04. Admin Create Brand User
 
-Creates a normal `BRAND` user. `brandId` valid existing brand id hona required hai.
+Only `ADMIN` role token can create brand user.
 
 ```http
-POST {{baseUrl}}/users/signup
+POST {{baseUrl}}/users/admin/users
+Authorization: Bearer {{adminAccessToken}}
 Content-Type: application/json
 ```
 
@@ -129,11 +130,12 @@ Body:
   "email": "{{brandEmail}}",
   "password": "{{brandPassword}}",
   "fullName": "{{brandFullName}}",
+  "role": "BRAND",
   "brandId": {{brandId}}
 }
 ```
 
-Note: Postman automatically `accessToken` environment variable mein save karega.
+Expected output mein password return nahi hota.
 
 ---
 
@@ -246,7 +248,7 @@ Expected output:
 ## Important notes
 
 - `{{baseUrl}}` default value: `http://localhost:3000`
-- `{{accessToken}}` brand signup/login ke baad auto-save hota hai.
+- `{{accessToken}}` brand login ke baad auto-save hota hai.
 - `{{adminAccessToken}}` admin login ke baad auto-save hota hai.
 - `{{brandId}}` create brand ke baad auto-save hota hai.
 - Admin-only APIs normal brand token se run karne par `403 Forbidden` return karengi.

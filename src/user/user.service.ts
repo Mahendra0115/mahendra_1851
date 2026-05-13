@@ -29,15 +29,6 @@ export class UserService implements OnModuleInit {
     await this.seedAdmin();
   }
 
-  async signup(createUserDto: CreateUserDto) {
-    const user = await this.createUser({
-      ...createUserDto,
-      role: UserRole.BRAND,
-    });
-
-    return this.buildAuthResponse(user);
-  }
-
   async login(loginDto: LoginDto) {
     const user = await this.userRepository.findOne({
       where: { email: loginDto.email },
