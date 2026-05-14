@@ -17,6 +17,7 @@ import { RolesGuard } from '../user/guards/roles.guard';
 import type { AuthenticatedRequest } from '../user/types/authenticated-request.type';
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandProfileDto } from './dto/update-brand-profile.dto';
 import { UpdateBrandStatusDto } from './dto/update-brand-status.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 
@@ -37,6 +38,32 @@ export class BrandController {
   @Get()
   findAll() {
     return this.brandService.findAll();
+  }
+
+  @Patch('me')
+  @Roles(UserRole.BRAND)
+  updateOwnProfile(
+    @Body() updateBrandProfileDto: UpdateBrandProfileDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.brandService.updateOwnProfile(
+      updateBrandProfileDto,
+      request.user,
+    );
+  }
+
+  @Patch(':id/profile')
+  @Roles(UserRole.ADMIN, UserRole.BRAND)
+  updateProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBrandProfileDto: UpdateBrandProfileDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.brandService.updateProfile(
+      id,
+      updateBrandProfileDto,
+      request.user,
+    );
   }
 
   @Patch(':id')
