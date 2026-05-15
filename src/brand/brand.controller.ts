@@ -17,6 +17,7 @@ import { RolesGuard } from '../user/guards/roles.guard';
 import type { AuthenticatedRequest } from '../user/types/authenticated-request.type';
 import { BrandService } from './brand.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandStatusDto } from './dto/update-brand-status.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 
 @Controller('brands')
@@ -44,6 +45,14 @@ export class BrandController {
     @Body() updateBrandDto: UpdateBrandDto,
   ) {
     return this.brandService.update(id, updateBrandDto);
+  }
+
+  @Patch(':id/status')
+  updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateBrandStatusDto: UpdateBrandStatusDto,
+  ) {
+    return this.brandService.updateStatus(id, updateBrandStatusDto);
   }
 
   @Delete(':id')

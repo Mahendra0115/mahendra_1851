@@ -43,7 +43,8 @@ Role: ADMIN
 6. `06 POST /users/admin/users - Create User`
 7. `07 GET /brands - List All Brands`
 8. `08 PATCH /brands/:id - Update Brand`
-9. `09 DELETE /brands/:id - Delete Brand`
+9. `09 PATCH /brands/:id/status - Update Brand Status`
+10. `10 DELETE /brands/:id - Delete Brand`
 
 ---
 
@@ -185,7 +186,7 @@ Expected output mein password return nahi hota.
 
 ---
 
-### 06. Admin List All Brands
+### 07. Admin List All Brands
 
 ```http
 GET {{baseUrl}}/brands
@@ -210,7 +211,7 @@ Expected output:
 
 ---
 
-### 07. Admin Update Brand
+### 08. Admin Update Brand
 
 ```http
 PATCH {{baseUrl}}/brands/{{brandId}}
@@ -230,7 +231,27 @@ Body:
 
 ---
 
-### 08. Admin Delete Brand
+### 09. Admin Update Brand Status
+
+```http
+PATCH {{baseUrl}}/brands/{{brandId}}/status
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "status": "APPROVED"
+}
+```
+
+Expected output mein brand ka `status` `APPROVED` return hoga.
+
+---
+
+### 10. Admin Delete Brand
 
 ```http
 DELETE {{baseUrl}}/brands/{{brandId}}

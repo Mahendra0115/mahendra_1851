@@ -355,7 +355,55 @@
       "response": []
     },
     {
-      "name": "09 DELETE /brands/:id - Delete Brand",
+      "name": "09 PATCH /brands/:id/status - Update Brand Status",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Brand status updated', function () {",
+              "  pm.expect(pm.response.json().status).to.eql('APPROVED');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"APPROVED\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["brands", "{{brandId}}", "status"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10 DELETE /brands/:id - Delete Brand",
       "event": [
         {
           "listen": "test",
