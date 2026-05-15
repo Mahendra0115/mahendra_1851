@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../user/guards/jwt-auth.guard';
 import { RolesGuard } from '../user/guards/roles.guard';
 import type { AuthenticatedRequest } from '../user/types/authenticated-request.type';
 import { BrandService } from './brand.service';
+import { AssignAuthorDto } from './dto/assign-author.dto';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandProfileDto } from './dto/update-brand-profile.dto';
 import { UpdateBrandStatusDto } from './dto/update-brand-status.dto';
@@ -80,6 +81,27 @@ export class BrandController {
     @Body() updateBrandStatusDto: UpdateBrandStatusDto,
   ) {
     return this.brandService.updateStatus(id, updateBrandStatusDto);
+  }
+
+  @Post(':id/authors')
+  assignAuthor(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() assignAuthorDto: AssignAuthorDto,
+  ) {
+    return this.brandService.assignAuthor(id, assignAuthorDto.authorId);
+  }
+
+  @Get(':id/authors')
+  findAuthors(@Param('id', ParseIntPipe) id: number) {
+    return this.brandService.findAuthors(id);
+  }
+
+  @Delete(':id/authors/:authorId')
+  removeAuthor(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('authorId', ParseIntPipe) authorId: number,
+  ) {
+    return this.brandService.removeAuthor(id, authorId);
   }
 
   @Delete(':id')

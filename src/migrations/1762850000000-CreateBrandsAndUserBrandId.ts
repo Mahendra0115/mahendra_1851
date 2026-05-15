@@ -6,9 +6,7 @@ import {
   TableForeignKey,
 } from 'typeorm';
 
-export class CreateBrandsAndUserBrandId1762850000000
-  implements MigrationInterface
-{
+export class CreateBrandsAndUserBrandId1762850000000 implements MigrationInterface {
   name = 'CreateBrandsAndUserBrandId1762850000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

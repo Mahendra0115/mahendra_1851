@@ -95,6 +95,10 @@ export class UserService implements OnModuleInit {
       return null;
     }
 
+    if (role === UserRole.AUTHOR) {
+      return null;
+    }
+
     const parsedBrandId = Number(brandId);
 
     if (!Number.isInteger(parsedBrandId)) {

@@ -600,6 +600,606 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "14 POST /users/admin/users - Task 5 Create Author User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Author user created', function () {",
+              "  pm.expect(json.role).to.eql('AUTHOR');",
+              "  pm.expect(json.brandId).to.eql(null);",
+              "});",
+              "if (json.id) {",
+              "  pm.environment.set('authorId', json.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{authorEmail}}\",\n  \"password\": \"{{authorPassword}}\",\n  \"fullName\": \"{{authorFullName}}\",\n  \"role\": \"AUTHOR\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/admin/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "admin",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "15 POST /users/login - Task 5 Author Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Logged in user is AUTHOR', function () {",
+              "  pm.expect(json.user.role).to.eql('AUTHOR');",
+              "});",
+              "if (json.accessToken) {",
+              "  pm.environment.set('authorAccessToken', json.accessToken);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{authorEmail}}\",\n  \"password\": \"{{authorPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "16 POST /brands/:id/authors - Assign Author To Brand",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201 or 200', function () {",
+              "  pm.expect([200, 201]).to.include(pm.response.code);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Author assigned to brand', function () {",
+              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
+              "  pm.expect(json.authorId).to.eql(Number(pm.environment.get('authorId')));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"authorId\": {{authorId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}/authors",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}",
+            "authors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "17 GET /brands/:id/authors - List Brand Authors",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response is array', function () {",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}/authors",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}",
+            "authors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "18 POST /articles - Brand Create Article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Brand article created', function () {",
+              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
+              "  pm.expect(json).to.have.property('id');",
+              "});",
+              "if (json.id) {",
+              "  pm.environment.set('articleId', json.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"{{articleTitle}}\",\n  \"content\": \"{{articleContent}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/articles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "19 GET /articles - Brand List Own Brand Articles",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response is array', function () {",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/articles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "20 PATCH /articles/:id - Brand Update Article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Article title updated', function () {",
+              "  pm.expect(pm.response.json().title).to.eql(pm.environment.get('updatedArticleTitle'));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"{{updatedArticleTitle}}\",\n  \"content\": \"{{updatedArticleContent}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/articles/{{articleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles",
+            "{{articleId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "21 POST /articles - Author Create Article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Author article created', function () {",
+              "  pm.expect(json.authorId).to.eql(Number(pm.environment.get('authorId')));",
+              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
+              "});",
+              "if (json.id) {",
+              "  pm.environment.set('authorArticleId', json.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{authorAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"{{authorArticleTitle}}\",\n  \"content\": \"{{authorArticleContent}}\",\n  \"brandId\": {{brandId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/articles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "22 GET /articles - Author List Own Articles",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response is array', function () {",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{authorAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/articles",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "23 PATCH /articles/:id - Author Update Own Article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{authorAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"{{updatedAuthorArticleTitle}}\",\n  \"content\": \"{{updatedAuthorArticleContent}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/articles/{{authorArticleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles",
+            "{{authorArticleId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "24 DELETE /articles/:id - Author Delete Own Article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Article deleted', function () {",
+              "  pm.expect(pm.response.json().message).to.eql('Article deleted successfully');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{authorAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/articles/{{authorArticleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles",
+            "{{authorArticleId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "25 DELETE /brands/:id/authors/:authorId - Remove Author From Brand",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Author removed from brand', function () {",
+              "  pm.expect(pm.response.json().message).to.eql('Author removed from brand successfully');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}/authors/{{authorId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}",
+            "authors",
+            "{{authorId}}"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "auth": {
