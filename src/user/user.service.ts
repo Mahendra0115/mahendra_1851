@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
   OnModuleInit,
   UnauthorizedException,
@@ -11,18 +12,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { Brand } from '../brand/entities/brand.entity';
+import { AppMailService } from '../mail/mail.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
 import { User, UserRole } from './entities/user.entity';
 
 @Injectable()
 export class UserService implements OnModuleInit {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Brand)
     private readonly brandRepository: Repository<Brand>,
     private readonly jwtService: JwtService,
+    private readonly mailService: AppMailService,
   ) {}
 
   async onModuleInit() {
@@ -55,6 +60,10 @@ export class UserService implements OnModuleInit {
       ...createUserDto,
       role: createUserDto.role || UserRole.BRAND,
     });
+
+    if (user.role === UserRole.BRAND) {
+      await this.sendBrandUserCredentials(user, createUserDto.password);
+    }
 
     return this.serializeUser(user);
   }
@@ -125,6 +134,26 @@ export class UserService implements OnModuleInit {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  private async sendBrandUserCredentials(user: User, plainPassword: string) {
+    try {
+      const brand = user.brandId
+        ? await this.brandRepository.findOne({ where: { id: user.brandId } })
+        : null;
+
+      await this.mailService.sendBrandUserCredentials({
+        email: user.email,
+        password: plainPassword,
+        fullName: user.fullName,
+        brandName: brand?.name,
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.warn(
+        `Brand user credentials email could not be sent to ${user.email}: ${message}`,
+      );
+    }
   }
 
   private async seedAdmin() {

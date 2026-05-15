@@ -26,8 +26,12 @@
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/",
-          "host": ["{{baseUrl}}"],
-          "path": [""]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            ""
+          ]
         }
       },
       "response": []
@@ -69,8 +73,13 @@
         },
         "url": {
           "raw": "{{baseUrl}}/users/login",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "login"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "login"
+          ]
         }
       },
       "response": []
@@ -122,8 +131,12 @@
         },
         "url": {
           "raw": "{{baseUrl}}/brands",
-          "host": ["{{baseUrl}}"],
-          "path": ["brands"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands"
+          ]
         }
       },
       "response": []
@@ -175,8 +188,14 @@
         },
         "url": {
           "raw": "{{baseUrl}}/users/admin/users",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "admin", "users"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "admin",
+            "users"
+          ]
         }
       },
       "response": []
@@ -214,8 +233,13 @@
         },
         "url": {
           "raw": "{{baseUrl}}/users/login",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "login"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "login"
+          ]
         }
       },
       "response": []
@@ -264,8 +288,14 @@
         },
         "url": {
           "raw": "{{baseUrl}}/users/admin/users",
-          "host": ["{{baseUrl}}"],
-          "path": ["users", "admin", "users"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "admin",
+            "users"
+          ]
         }
       },
       "response": []
@@ -303,8 +333,12 @@
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/brands",
-          "host": ["{{baseUrl}}"],
-          "path": ["brands"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands"
+          ]
         }
       },
       "response": []
@@ -348,8 +382,13 @@
         },
         "url": {
           "raw": "{{baseUrl}}/brands/{{brandId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["brands", "{{brandId}}"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}"
+          ]
         }
       },
       "response": []
@@ -396,8 +435,14 @@
         },
         "url": {
           "raw": "{{baseUrl}}/brands/{{brandId}}/status",
-          "host": ["{{baseUrl}}"],
-          "path": ["brands", "{{brandId}}", "status"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}",
+            "status"
+          ]
         }
       },
       "response": []
@@ -432,8 +477,126 @@
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/brands/{{brandId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["brands", "{{brandId}}"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11 PATCH /brands/me - Brand Self Profile Update",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Updated Brand Name\",\n  \"description\": \"Updated by brand user\",\n  \"logoUrl\": \"https://logo.com/new-logo.png\",\n  \"password\": \"newpassword123\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/brands/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12 PATCH /brands/:id/profile - Admin Update Any Brand",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Admin Updated Brand\",\n  \"description\": \"Updated by admin\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}",
+            "profile"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13 PATCH /brands/:id/profile - Unauthorized Brand Access",
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Hacked Brand\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/brands/999/profile",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "999",
+            "profile"
+          ]
         }
       },
       "response": []
@@ -447,14 +610,18 @@
       "listen": "prerequest",
       "script": {
         "type": "text/javascript",
-        "exec": [""]
+        "exec": [
+          ""
+        ]
       }
     },
     {
       "listen": "test",
       "script": {
         "type": "text/javascript",
-        "exec": [""]
+        "exec": [
+          ""
+        ]
       }
     }
   ]
