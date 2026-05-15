@@ -35,14 +35,15 @@ Role: ADMIN
 
 ## Test order
 
-1. `01 Health / 01 GET /`
-2. `02 Auth / 02 POST /users/login - Seed Admin Login`
-3. `03 Admin Users / 03 POST /users/admin/users - Create User`
-4. `02 Auth / 04 POST /users/login - Brand Login`
-5. `04 Admin Brands / 05 POST /brands - Create Brand`
-6. `04 Admin Brands / 06 GET /brands - List All Brands`
-7. `04 Admin Brands / 07 PATCH /brands/:id - Update Brand`
-8. `04 Admin Brands / 08 DELETE /brands/:id - Delete Brand`
+1. `01 GET / - Health`
+2. `02 POST /users/login - Seed Admin Login`
+3. `03 POST /brands - Create Brand`
+4. `04 POST /users/admin/users - Create Brand User`
+5. `05 POST /users/login - Brand Login`
+6. `06 POST /users/admin/users - Create User`
+7. `07 GET /brands - List All Brands`
+8. `08 PATCH /brands/:id - Update Brand`
+9. `09 DELETE /brands/:id - Delete Brand`
 
 ---
 
@@ -84,58 +85,11 @@ Body:
 }
 ```
 
-Note: Postman automatically `adminAccessToken` environment variable mein save karega.
+Note: Response me admin user ka `brandId` null aana chahiye. Postman automatically `adminAccessToken` environment variable mein save karega.
 
 ---
 
-### 03. Admin Create User
-
-Only `ADMIN` role token can access it.
-
-```http
-POST {{baseUrl}}/users/admin/users
-Authorization: Bearer {{adminAccessToken}}
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{newUserEmail}}",
-  "password": "{{newUserPassword}}",
-  "fullName": "{{newUserFullName}}",
-  "role": "{{newUserRole}}"
-}
-```
-
-Expected output mein password return nahi hota.
-
----
-
-### 04. Brand Login
-
-Admin-created brand user login ke liye.
-
-```http
-POST {{baseUrl}}/users/login
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "email": "{{newUserEmail}}",
-  "password": "{{newUserPassword}}"
-}
-```
-
-Note: Ye token normal brand user ka token hai, admin token nahi.
-
----
-
-### 05. Admin Create Brand
+### 03. Admin Create Brand
 
 Only `ADMIN` role token can create brand.
 
@@ -155,21 +109,79 @@ Body:
 }
 ```
 
-Expected output:
+Note: Postman automatically `brandId` environment variable mein save karega.
+
+---
+
+### 04. Admin Create Brand User
+
+Only `ADMIN` role token can create brand user.
+
+```http
+POST {{baseUrl}}/users/admin/users
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+```
+
+Body:
 
 ```json
 {
-  "id": 1,
-  "name": "Nike",
-  "description": "Sportswear brand",
-  "logoUrl": "https://example.com/nike-logo.png",
-  "createdById": 1,
-  "createdAt": "2026-05-11T10:00:00.000Z",
-  "updatedAt": "2026-05-11T10:00:00.000Z"
+  "email": "{{brandEmail}}",
+  "password": "{{brandPassword}}",
+  "fullName": "{{brandFullName}}",
+  "role": "BRAND",
+  "brandId": {{brandId}}
 }
 ```
 
-Note: Postman automatically `brandId` environment variable mein save karega.
+Expected output mein password return nahi hota.
+
+---
+
+### 05. Brand Login
+
+```http
+POST {{baseUrl}}/users/login
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "email": "{{brandEmail}}",
+  "password": "{{brandPassword}}"
+}
+```
+
+Note: Ye token normal brand user ka token hai, admin token nahi.
+
+---
+
+### 06. Admin Create User
+
+Only `ADMIN` role token can access it.
+
+```http
+POST {{baseUrl}}/users/admin/users
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "email": "{{newUserEmail}}",
+  "password": "{{newUserPassword}}",
+  "fullName": "{{newUserFullName}}",
+  "role": "{{newUserRole}}",
+  "brandId": {{brandId}}
+}
+```
+
+Expected output mein password return nahi hota.
 
 ---
 
@@ -236,7 +248,7 @@ Expected output:
 ## Important notes
 
 - `{{baseUrl}}` default value: `http://localhost:3000`
-- `{{accessToken}}` admin-created brand user login ke baad auto-save hota hai.
+- `{{accessToken}}` brand login ke baad auto-save hota hai.
 - `{{adminAccessToken}}` admin login ke baad auto-save hota hai.
 - `{{brandId}}` create brand ke baad auto-save hota hai.
 - Admin-only APIs normal brand token se run karne par `403 Forbidden` return karengi.

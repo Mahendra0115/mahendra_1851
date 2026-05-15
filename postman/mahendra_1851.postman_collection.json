@@ -7,353 +7,388 @@
   },
   "item": [
     {
-      "name": "01 Health",
-      "item": [
+      "name": "01 GET / - Health",
+      "event": [
         {
-          "name": "01 GET /",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/",
-              "host": ["{{baseUrl}}"],
-              "path": [""]
-            }
-          },
-          "response": []
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
         }
-      ]
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/",
+          "host": ["{{baseUrl}}"],
+          "path": [""]
+        }
+      },
+      "response": []
     },
     {
-      "name": "02 Auth",
-      "item": [
+      "name": "02 POST /users/login - Seed Admin Login",
+      "event": [
         {
-          "name": "02 Seed Admin Login",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "const json = pm.response.json();",
-                  "pm.test('User role is ADMIN', function () {",
-                  "  pm.expect(json.user.role).to.eql('ADMIN');",
-                  "});",
-                  "if (json.accessToken) {",
-                  "  pm.environment.set('adminAccessToken', json.accessToken);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('User role is ADMIN and brandId is null', function () {",
+              "  pm.expect(json.user.role).to.eql('ADMIN');",
+              "  pm.expect(json.user.brandId).to.eql(null);",
+              "});",
+              "if (json.accessToken) {",
+              "  pm.environment.set('adminAccessToken', json.accessToken);",
+              "}"
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "login"]
-            }
-          },
-          "response": []
+            "type": "text/javascript"
+          }
         }
-      ]
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "login"]
+        }
+      },
+      "response": []
     },
     {
-      "name": "03 Admin Users ",
-      "item": [
+      "name": "03 POST /brands - Create Brand",
+      "event": [
         {
-          "name": "03 Create User",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "const json = pm.response.json();",
-                  "pm.test('Response does not include password', function () {",
-                  "  pm.expect(json).to.not.have.property('password');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminAccessToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Brand created', function () {",
+              "  pm.expect(json).to.have.property('id');",
+              "  pm.expect(json).to.have.property('createdById');",
+              "});",
+              "if (json.id) {",
+              "  pm.environment.set('brandId', json.id);",
+              "}"
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\",\n  \"fullName\": \"{{newUserFullName}}\",\n  \"role\": \"{{newUserRole}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/admin/users",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "admin", "users"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "04 Brand Login",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "const json = pm.response.json();",
-                  "if (json.accessToken) {",
-                  "  pm.environment.set('accessToken', json.accessToken);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/login",
-              "host": ["{{baseUrl}}"],
-              "path": ["users", "login"]
-            }
-          },
-          "response": []
+            "type": "text/javascript"
+          }
         }
-      ]
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{brandName}}\",\n  \"description\": \"{{brandDescription}}\",\n  \"logoUrl\": \"{{brandLogoUrl}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/brands",
+          "host": ["{{baseUrl}}"],
+          "path": ["brands"]
+        }
+      },
+      "response": []
     },
     {
-      "name": "04 Admin Brands",
-      "item": [
+      "name": "04 POST /users/admin/users - Create Brand User",
+      "event": [
         {
-          "name": "05 Create Brand",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 201', function () {",
-                  "  pm.response.to.have.status(201);",
-                  "});",
-                  "const json = pm.response.json();",
-                  "pm.test('Brand created', function () {",
-                  "  pm.expect(json).to.have.property('id');",
-                  "  pm.expect(json).to.have.property('createdById');",
-                  "});",
-                  "if (json.id) {",
-                  "  pm.environment.set('brandId', json.id);",
-                  "}"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminAccessToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "pm.test('Brand user has valid brandId', function () {",
+              "  const json = pm.response.json();",
+              "  pm.expect(json.role).to.eql('BRAND');",
+              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
+              "});",
+              "pm.test('Response does not include password', function () {",
+              "  pm.expect(pm.response.json()).to.not.have.property('password');",
+              "});"
             ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"{{brandName}}\",\n  \"description\": \"{{brandDescription}}\",\n  \"logoUrl\": \"{{brandLogoUrl}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/brands",
-              "host": ["{{baseUrl}}"],
-              "path": ["brands"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "06  List All Brands",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});",
-                  "pm.test('Response is array', function () {",
-                  "  pm.expect(pm.response.json()).to.be.an('array');",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminAccessToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/brands",
-              "host": ["{{baseUrl}}"],
-              "path": ["brands"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "07  Update Brand",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminAccessToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PATCH",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"{{updatedBrandName}}\",\n  \"description\": \"{{updatedBrandDescription}}\",\n  \"logoUrl\": \"{{updatedBrandLogoUrl}}\"\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/brands/{{brandId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["brands", "{{brandId}}"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "08  Delete Brand",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test('Status code is 200', function () {",
-                  "  pm.response.to.have.status(200);",
-                  "});"
-                ],
-                "type": "text/javascript"
-              }
-            }
-          ],
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{adminAccessToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/brands/{{brandId}}",
-              "host": ["{{baseUrl}}"],
-              "path": ["brands", "{{brandId}}"]
-            }
-          },
-          "response": []
+            "type": "text/javascript"
+          }
         }
-      ]
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{brandEmail}}\",\n  \"password\": \"{{brandPassword}}\",\n  \"fullName\": \"{{brandFullName}}\",\n  \"role\": \"BRAND\",\n  \"brandId\": {{brandId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/admin/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "admin", "users"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 POST /users/login - Brand Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "if (json.accessToken) {",
+              "  pm.environment.set('accessToken', json.accessToken);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{brandEmail}}\",\n  \"password\": \"{{brandPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "login"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 POST /users/admin/users - Create User",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 201', function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Response does not include password and has brandId', function () {",
+              "  pm.expect(json).to.not.have.property('password');",
+              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\",\n  \"fullName\": \"{{newUserFullName}}\",\n  \"role\": \"{{newUserRole}}\",\n  \"brandId\": {{brandId}}\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/admin/users",
+          "host": ["{{baseUrl}}"],
+          "path": ["users", "admin", "users"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 GET /brands - List All Brands",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response is array', function () {",
+              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/brands",
+          "host": ["{{baseUrl}}"],
+          "path": ["brands"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "08 PATCH /brands/:id - Update Brand",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{updatedBrandName}}\",\n  \"description\": \"{{updatedBrandDescription}}\",\n  \"logoUrl\": \"{{updatedBrandLogoUrl}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["brands", "{{brandId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "09 DELETE /brands/:id - Delete Brand",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["brands", "{{brandId}}"]
+        }
+      },
+      "response": []
     }
   ],
   "auth": {
