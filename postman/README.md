@@ -35,7 +35,6 @@ Role: ADMIN
 
 ## Test order
 
-<<<<<<< task3-add-brand-status
 1. `01 GET / - Health`
 2. `02 POST /users/login - Seed Admin Login`
 3. `03 POST /brands - Create Brand`
@@ -46,16 +45,6 @@ Role: ADMIN
 8. `08 PATCH /brands/:id - Update Brand`
 9. `09 PATCH /brands/:id/status - Update Brand Status`
 10. `10 DELETE /brands/:id - Delete Brand`
-=======
-1. `01 Health / 01 GET /`
-2. `02 Auth / 02 POST /users/login - Seed Admin Login`
-3. `03 Admin Users / 03 POST /users/admin/users - Create User`
-4. `02 Auth / 04 POST /users/login - Brand Login`
-5. `04 Admin Brands / 05 POST /brands - Create Brand`
-6. `04 Admin Brands / 06 GET /brands - List All Brands`
-7. `04 Admin Brands / 07 PATCH /brands/:id - Update Brand`
-8. `04 Admin Brands / 08 DELETE /brands/:id - Delete Brand`
->>>>>>> main
 
 ---
 
@@ -82,7 +71,6 @@ Hello World!
 ### 02. Seed Admin Login
 
 Admin token protected admin APIs ke liye required hai.
-<<<<<<< task3-add-brand-status
 
 ```http
 POST {{baseUrl}}/users/login
@@ -105,8 +93,6 @@ Note: Response me admin user ka `brandId` null aana chahiye. Postman automatical
 ### 03. Admin Create Brand
 
 Only `ADMIN` role token can create brand.
-=======
->>>>>>> main
 
 ```http
 POST {{baseUrl}}/brands
@@ -118,7 +104,6 @@ Body:
 
 ```json
 {
-<<<<<<< task3-add-brand-status
   "name": "{{brandName}}",
   "description": "{{brandDescription}}",
   "logoUrl": "{{brandLogoUrl}}"
@@ -132,20 +117,6 @@ Note: Postman automatically `brandId` environment variable mein save karega.
 ### 04. Admin Create Brand User
 
 Only `ADMIN` role token can create brand user.
-=======
-  "email": "{{adminEmail}}",
-  "password": "{{adminPassword}}"
-}
-```
-
-Note: Postman automatically `adminAccessToken` environment variable mein save karega.
-
----
-
-### 03. Admin Create User
-
-Only `ADMIN` role token can access it.
->>>>>>> main
 
 ```http
 POST {{baseUrl}}/users/admin/users
@@ -157,18 +128,11 @@ Body:
 
 ```json
 {
-<<<<<<< task3-add-brand-status
   "email": "{{brandEmail}}",
   "password": "{{brandPassword}}",
   "fullName": "{{brandFullName}}",
   "role": "BRAND",
   "brandId": {{brandId}}
-=======
-  "email": "{{newUserEmail}}",
-  "password": "{{newUserPassword}}",
-  "fullName": "{{newUserFullName}}",
-  "role": "{{newUserRole}}"
->>>>>>> main
 }
 ```
 
@@ -176,13 +140,7 @@ Expected output mein password return nahi hota.
 
 ---
 
-<<<<<<< task3-add-brand-status
 ### 05. Brand Login
-=======
-### 04. Brand Login
-
-Admin-created brand user login ke liye.
->>>>>>> main
 
 ```http
 POST {{baseUrl}}/users/login
@@ -193,13 +151,8 @@ Body:
 
 ```json
 {
-<<<<<<< task3-add-brand-status
   "email": "{{brandEmail}}",
   "password": "{{brandPassword}}"
-=======
-  "email": "{{newUserEmail}}",
-  "password": "{{newUserPassword}}"
->>>>>>> main
 }
 ```
 
@@ -207,11 +160,7 @@ Note: Ye token normal brand user ka token hai, admin token nahi.
 
 ---
 
-<<<<<<< task3-add-brand-status
 ### 06. Admin Create User
-=======
-### 05. Admin Create Brand
->>>>>>> main
 
 Only `ADMIN` role token can access it.
 
@@ -237,7 +186,7 @@ Expected output mein password return nahi hota.
 
 ---
 
-### 06. Admin List All Brands
+### 07. Admin List All Brands
 
 ```http
 GET {{baseUrl}}/brands
@@ -262,7 +211,7 @@ Expected output:
 
 ---
 
-### 07. Admin Update Brand
+### 08. Admin Update Brand
 
 ```http
 PATCH {{baseUrl}}/brands/{{brandId}}
@@ -282,7 +231,6 @@ Body:
 
 ---
 
-<<<<<<< task3-add-brand-status
 ### 09. Admin Update Brand Status
 
 ```http
@@ -304,9 +252,6 @@ Expected output mein brand ka `status` `APPROVED` return hoga.
 ---
 
 ### 10. Admin Delete Brand
-=======
-### 08. Admin Delete Brand
->>>>>>> main
 
 ```http
 DELETE {{baseUrl}}/brands/{{brandId}}
@@ -324,11 +269,7 @@ Expected output:
 ## Important notes
 
 - `{{baseUrl}}` default value: `http://localhost:3000`
-<<<<<<< task3-add-brand-status
 - `{{accessToken}}` brand login ke baad auto-save hota hai.
-=======
-- `{{accessToken}}` admin-created brand user login ke baad auto-save hota hai.
->>>>>>> main
 - `{{adminAccessToken}}` admin login ke baad auto-save hota hai.
 - `{{brandId}}` create brand ke baad auto-save hota hai.
 - Admin-only APIs normal brand token se run karne par `403 Forbidden` return karengi.
