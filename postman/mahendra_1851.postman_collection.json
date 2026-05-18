@@ -614,11 +614,8 @@
               "const json = pm.response.json();",
               "pm.test('Author user created', function () {",
               "  pm.expect(json.role).to.eql('AUTHOR');",
-              "  pm.expect(json.brandId).to.eql(null);",
               "});",
-              "if (json.id) {",
-              "  pm.environment.set('authorId', json.id);",
-              "}"
+              "if (json.id) { pm.environment.set('authorId', json.id); }"
             ],
             "type": "text/javascript"
           }
@@ -644,7 +641,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"{{authorEmail}}\",\n  \"password\": \"{{authorPassword}}\",\n  \"fullName\": \"{{authorFullName}}\",\n  \"role\": \"AUTHOR\"\n}"
+          "raw": "{\n  \"email\": \"bob.author@example.com\",\n  \"password\": \"author1234\",\n  \"fullName\": \"Bob Author\",\n  \"role\": \"AUTHOR\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/users/admin/users",
@@ -674,9 +671,7 @@
               "pm.test('Logged in user is AUTHOR', function () {",
               "  pm.expect(json.user.role).to.eql('AUTHOR');",
               "});",
-              "if (json.accessToken) {",
-              "  pm.environment.set('authorAccessToken', json.accessToken);",
-              "}"
+              "if (json.accessToken) { pm.environment.set('authorAccessToken', json.accessToken); }"
             ],
             "type": "text/javascript"
           }
@@ -692,7 +687,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"{{authorEmail}}\",\n  \"password\": \"{{authorPassword}}\"\n}"
+          "raw": "{\n  \"email\": \"bob.author@example.com\",\n  \"password\": \"author1234\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/users/login",
@@ -716,11 +711,6 @@
             "exec": [
               "pm.test('Status code is 201 or 200', function () {",
               "  pm.expect([200, 201]).to.include(pm.response.code);",
-              "});",
-              "const json = pm.response.json();",
-              "pm.test('Author assigned to brand', function () {",
-              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
-              "  pm.expect(json.authorId).to.eql(Number(pm.environment.get('authorId')));",
               "});"
             ],
             "type": "text/javascript"
@@ -764,52 +754,7 @@
       "response": []
     },
     {
-      "name": "17 GET /brands/:id/authors - List Brand Authors",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status code is 200', function () {",
-              "  pm.response.to.have.status(200);",
-              "});",
-              "pm.test('Response is array', function () {",
-              "  pm.expect(pm.response.json()).to.be.an('array');",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{adminAccessToken}}",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/brands/{{brandId}}/authors",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "brands",
-            "{{brandId}}",
-            "authors"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "18 POST /articles - Brand Create Article",
+      "name": "17 POST /articles - Create Article",
       "event": [
         {
           "listen": "test",
@@ -819,13 +764,7 @@
               "  pm.response.to.have.status(201);",
               "});",
               "const json = pm.response.json();",
-              "pm.test('Brand article created', function () {",
-              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
-              "  pm.expect(json).to.have.property('id');",
-              "});",
-              "if (json.id) {",
-              "  pm.environment.set('articleId', json.id);",
-              "}"
+              "if (json.id) { pm.environment.set('articleId', json.id); }"
             ],
             "type": "text/javascript"
           }
@@ -851,7 +790,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"{{articleTitle}}\",\n  \"content\": \"{{articleContent}}\"\n}"
+          "raw": "{\n  \"title\": \"Task 5 Article\",\n  \"content\": \"This article is created for Task 5 testing.\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/articles",
@@ -866,7 +805,7 @@
       "response": []
     },
     {
-      "name": "19 GET /articles - Brand List Own Brand Articles",
+      "name": "18 GET /articles - List Articles",
       "event": [
         {
           "listen": "test",
@@ -874,9 +813,6 @@
             "exec": [
               "pm.test('Status code is 200', function () {",
               "  pm.response.to.have.status(200);",
-              "});",
-              "pm.test('Response is array', function () {",
-              "  pm.expect(pm.response.json()).to.be.an('array');",
               "});"
             ],
             "type": "text/javascript"
@@ -909,7 +845,7 @@
       "response": []
     },
     {
-      "name": "20 PATCH /articles/:id - Brand Update Article",
+      "name": "19 PATCH /articles/:id - Update Article",
       "event": [
         {
           "listen": "test",
@@ -917,9 +853,6 @@
             "exec": [
               "pm.test('Status code is 200', function () {",
               "  pm.response.to.have.status(200);",
-              "});",
-              "pm.test('Article title updated', function () {",
-              "  pm.expect(pm.response.json().title).to.eql(pm.environment.get('updatedArticleTitle'));",
               "});"
             ],
             "type": "text/javascript"
@@ -946,7 +879,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"title\": \"{{updatedArticleTitle}}\",\n  \"content\": \"{{updatedArticleContent}}\"\n}"
+          "raw": "{\n  \"title\": \"Updated Task 5 Article\",\n  \"content\": \"This article is updated for Task 5 testing.\"\n}"
         },
         "url": {
           "raw": "{{baseUrl}}/articles/{{articleId}}",
@@ -962,107 +895,7 @@
       "response": []
     },
     {
-      "name": "21 POST /articles - Author Create Article",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status code is 201', function () {",
-              "  pm.response.to.have.status(201);",
-              "});",
-              "const json = pm.response.json();",
-              "pm.test('Author article created', function () {",
-              "  pm.expect(json.authorId).to.eql(Number(pm.environment.get('authorId')));",
-              "  pm.expect(json.brandId).to.eql(Number(pm.environment.get('brandId')));",
-              "});",
-              "if (json.id) {",
-              "  pm.environment.set('authorArticleId', json.id);",
-              "}"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{authorAccessToken}}",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"{{authorArticleTitle}}\",\n  \"content\": \"{{authorArticleContent}}\",\n  \"brandId\": {{brandId}}\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/articles",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "articles"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "22 GET /articles - Author List Own Articles",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status code is 200', function () {",
-              "  pm.response.to.have.status(200);",
-              "});",
-              "pm.test('Response is array', function () {",
-              "  pm.expect(pm.response.json()).to.be.an('array');",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{authorAccessToken}}",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/articles",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "articles"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "23 PATCH /articles/:id - Author Update Own Article",
+      "name": "20 DELETE /articles/:id - Delete Article",
       "event": [
         {
           "listen": "test",
@@ -1082,60 +915,7 @@
           "bearer": [
             {
               "key": "token",
-              "value": "{{authorAccessToken}}",
-              "type": "string"
-            }
-          ]
-        },
-        "method": "PATCH",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"{{updatedAuthorArticleTitle}}\",\n  \"content\": \"{{updatedAuthorArticleContent}}\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/articles/{{authorArticleId}}",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "articles",
-            "{{authorArticleId}}"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "24 DELETE /articles/:id - Author Delete Own Article",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status code is 200', function () {",
-              "  pm.response.to.have.status(200);",
-              "});",
-              "pm.test('Article deleted', function () {",
-              "  pm.expect(pm.response.json().message).to.eql('Article deleted successfully');",
-              "});"
-            ],
-            "type": "text/javascript"
-          }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{authorAccessToken}}",
+              "value": "{{accessToken}}",
               "type": "string"
             }
           ]
@@ -1143,20 +923,20 @@
         "method": "DELETE",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/articles/{{authorArticleId}}",
+          "raw": "{{baseUrl}}/articles/{{articleId}}",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "articles",
-            "{{authorArticleId}}"
+            "{{articleId}}"
           ]
         }
       },
       "response": []
     },
     {
-      "name": "25 DELETE /brands/:id/authors/:authorId - Remove Author From Brand",
+      "name": "21 DELETE /brands/:id/authors/:authorId - Remove Author From Brand",
       "event": [
         {
           "listen": "test",
@@ -1164,9 +944,6 @@
             "exec": [
               "pm.test('Status code is 200', function () {",
               "  pm.response.to.have.status(200);",
-              "});",
-              "pm.test('Author removed from brand', function () {",
-              "  pm.expect(pm.response.json().message).to.eql('Author removed from brand successfully');",
               "});"
             ],
             "type": "text/javascript"
@@ -1196,6 +973,344 @@
             "{{brandId}}",
             "authors",
             "{{authorId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "22 PATCH /articles/:id/status - Admin Publish Article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Article is published with publishedAt', function () {",
+              "  pm.expect(json.status).to.eql('PUBLISHED');",
+              "  pm.expect(json.publishedAt).to.not.eql(null);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"PUBLISHED\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/articles/{{articleId}}/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles",
+            "{{articleId}}",
+            "status"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "23 GET /public/articles - Public Published Article Feed",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Response has pagination format', function () {",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.be.an('array');",
+              "  pm.expect(json).to.have.property('total');",
+              "  pm.expect(json).to.have.property('totalPages');",
+              "  pm.expect(json).to.have.property('currentPage');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/public/articles?page={{page}}&limit={{limit}}&sortBy={{sortBy}}&order={{order}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "public",
+            "articles"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "{{page}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}"
+            },
+            {
+              "key": "sortBy",
+              "value": "{{sortBy}}"
+            },
+            {
+              "key": "order",
+              "value": "{{order}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "24 GET /public/articles/:id - Public Single Published Article",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Only published article is returned', function () {",
+              "  pm.expect(json.id).to.eql(Number(pm.environment.get('articleId')));",
+              "  pm.expect(json.status).to.eql('PUBLISHED');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/public/articles/{{articleId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "public",
+            "articles",
+            "{{articleId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "25 GET /public/articles/search - Public Article Search",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Response has pagination format', function () {",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.be.an('array');",
+              "  pm.expect(json).to.have.property('total');",
+              "  pm.expect(json).to.have.property('totalPages');",
+              "  pm.expect(json).to.have.property('currentPage');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/public/articles/search?query={{articleSearchQuery}}&page={{page}}&limit={{limit}}&sortBy={{sortBy}}&order={{order}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "public",
+            "articles",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "query",
+              "value": "{{articleSearchQuery}}"
+            },
+            {
+              "key": "page",
+              "value": "{{page}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}"
+            },
+            {
+              "key": "sortBy",
+              "value": "{{sortBy}}"
+            },
+            {
+              "key": "order",
+              "value": "{{order}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "26 GET /public/articles/brand/:brandId - Public Brand Article Filter",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Response has pagination format', function () {",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.be.an('array');",
+              "  pm.expect(json).to.have.property('total');",
+              "  pm.expect(json).to.have.property('totalPages');",
+              "  pm.expect(json).to.have.property('currentPage');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/public/articles/brand/{{brandId}}?page={{page}}&limit={{limit}}&sortBy={{sortBy}}&order={{order}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "public",
+            "articles",
+            "brand",
+            "{{brandId}}"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "{{page}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}"
+            },
+            {
+              "key": "sortBy",
+              "value": "{{sortBy}}"
+            },
+            {
+              "key": "order",
+              "value": "{{order}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "27 GET /articles/published - Brand Own Published Articles",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Response has pagination format', function () {",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.be.an('array');",
+              "  pm.expect(json).to.have.property('total');",
+              "  pm.expect(json).to.have.property('totalPages');",
+              "  pm.expect(json).to.have.property('currentPage');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/articles/published?page={{page}}&limit={{limit}}&sortBy={{sortBy}}&order={{order}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "articles",
+            "published"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "{{page}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}"
+            },
+            {
+              "key": "sortBy",
+              "value": "{{sortBy}}"
+            },
+            {
+              "key": "order",
+              "value": "{{order}}"
+            }
           ]
         }
       },

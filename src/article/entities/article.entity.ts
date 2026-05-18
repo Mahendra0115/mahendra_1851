@@ -10,6 +10,11 @@ import {
 import { Brand } from '../../brand/entities/brand.entity';
 import { User } from '../../user/entities/user.entity';
 
+export enum ArticleStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+}
+
 @Entity('articles')
 export class Article {
   @PrimaryGeneratedColumn()
@@ -34,6 +39,16 @@ export class Article {
 
   @Column({ type: 'int' })
   authorId: number;
+
+  @Column({
+    type: 'enum',
+    enum: ArticleStatus,
+    default: ArticleStatus.DRAFT,
+  })
+  status: ArticleStatus;
+
+  @Column({ type: 'timestamp', nullable: true })
+  publishedAt: Date | null;
 
   @CreateDateColumn()
   createdAt: Date;
