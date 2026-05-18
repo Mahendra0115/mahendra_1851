@@ -1,6 +1,8 @@
 import 'reflect-metadata';
 import { config } from 'dotenv';
 import { DataSource } from 'typeorm';
+import { Article } from './article/entities/article.entity';
+import { BrandAuthor } from './brand-author/entities/brand-author.entity';
 import { Brand } from './brand/entities/brand.entity';
 import { User } from './user/entities/user.entity';
 
@@ -13,7 +15,7 @@ export default new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'mahendra_1851',
-  entities: [User, Brand],
+  entities: [User, Brand, BrandAuthor, Article],
   migrations: ['src/migrations/*{.ts,.js}'],
   synchronize: false,
 });

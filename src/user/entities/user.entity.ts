@@ -10,6 +10,7 @@ import {
 export enum UserRole {
   ADMIN = 'ADMIN',
   BRAND = 'BRAND',
+  AUTHOR = 'AUTHOR',
 }
 
 @Entity('users')
@@ -21,7 +22,7 @@ export class User {
   email: string;
 
   @Column()
-  @Exclude()   // Never return password in responses
+  @Exclude() // Never return password in responses
   password: string;
 
   @Column({ type: 'enum', enum: UserRole, default: UserRole.BRAND })

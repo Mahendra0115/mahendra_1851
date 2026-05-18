@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
+import { BrandAuthor } from '../brand-author/entities/brand-author.entity';
 import { AuthenticatedUser } from '../user/types/authenticated-user.type';
 import { User, UserRole } from '../user/entities/user.entity';
 import { CreateBrandDto } from './dto/create-brand.dto';
@@ -22,6 +23,8 @@ export class BrandService {
     private readonly brandRepository: Repository<Brand>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(BrandAuthor)
+    private readonly brandAuthorRepository: Repository<BrandAuthor>,
   ) {}
 
   async create(createBrandDto: CreateBrandDto, adminUserId: number) {
@@ -108,6 +111,62 @@ export class BrandService {
     await this.brandRepository.remove(brand);
 
     return { message: 'Brand deleted successfully' };
+  }
+
+  async assignAuthor(brandId: number, authorId: number) {
+    await this.findOne(brandId);
+
+    const author = await this.userRepository.findOne({
+      where: { id: authorId, role: UserRole.AUTHOR },
+    });
+
+    if (!author) {
+      throw new NotFoundException('Author user not found');
+    }
+
+    const existingAssignment = await this.brandAuthorRepository.findOne({
+      where: { brandId, authorId },
+    });
+
+    if (existingAssignment) {
+      return existingAssignment;
+    }
+
+    const assignment = this.brandAuthorRepository.create({ brandId, authorId });
+
+    return this.brandAuthorRepository.save(assignment);
+  }
+
+  async findAuthors(brandId: number) {
+    await this.findOne(brandId);
+
+    const assignments = await this.brandAuthorRepository.find({
+      where: { brandId },
+      relations: { author: true },
+      order: { id: 'ASC' },
+    });
+
+    return assignments.map((assignment) => ({
+      id: assignment.id,
+      brandId: assignment.brandId,
+      authorId: assignment.authorId,
+      createdAt: assignment.createdAt,
+      author: this.serializeUser(assignment.author),
+    }));
+  }
+
+  async removeAuthor(brandId: number, authorId: number) {
+    const assignment = await this.brandAuthorRepository.findOne({
+      where: { brandId, authorId },
+    });
+
+    if (!assignment) {
+      throw new NotFoundException('Brand author assignment not found');
+    }
+
+    await this.brandAuthorRepository.remove(assignment);
+
+    return { message: 'Author removed from brand successfully' };
   }
 
   private async findOne(id: number) {
