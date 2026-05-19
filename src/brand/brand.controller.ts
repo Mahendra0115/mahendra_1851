@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -17,18 +18,19 @@ import { RolesGuard } from '../user/guards/roles.guard';
 import type { AuthenticatedRequest } from '../user/types/authenticated-request.type';
 import { BrandService } from './brand.service';
 import { AssignAuthorDto } from './dto/assign-author.dto';
+import { BrandProfileQueryDto } from './dto/brand-profile-query.dto';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandProfileDto } from './dto/update-brand-profile.dto';
 import { UpdateBrandStatusDto } from './dto/update-brand-status.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
 
 @Controller('brands')
-@Roles(UserRole.ADMIN)
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN)
   create(
     @Body() createBrandDto: CreateBrandDto,
     @Req() request: AuthenticatedRequest,
@@ -37,8 +39,11 @@ export class BrandController {
   }
 
   @Get()
-  findAll() {
-    return this.brandService.findAll();
+  findAll(
+    @Query() query: BrandProfileQueryDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.brandService.findAll(query, request.user);
   }
 
   @Patch('me')
@@ -51,6 +56,15 @@ export class BrandController {
       updateBrandProfileDto,
       request.user,
     );
+  }
+
+  @Get(':id/articles')
+  findPublishedArticles(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: BrandProfileQueryDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.brandService.findPublishedArticles(id, query, request.user);
   }
 
   @Patch(':id/profile')
@@ -68,6 +82,7 @@ export class BrandController {
   }
 
   @Patch(':id')
+  @Roles(UserRole.ADMIN)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateBrandDto: UpdateBrandDto,
@@ -76,6 +91,7 @@ export class BrandController {
   }
 
   @Patch(':id/status')
+  @Roles(UserRole.ADMIN)
   updateStatus(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateBrandStatusDto: UpdateBrandStatusDto,
@@ -84,6 +100,7 @@ export class BrandController {
   }
 
   @Post(':id/authors')
+  @Roles(UserRole.ADMIN)
   assignAuthor(
     @Param('id', ParseIntPipe) id: number,
     @Body() assignAuthorDto: AssignAuthorDto,
@@ -92,11 +109,13 @@ export class BrandController {
   }
 
   @Get(':id/authors')
+  @Roles(UserRole.ADMIN)
   findAuthors(@Param('id', ParseIntPipe) id: number) {
     return this.brandService.findAuthors(id);
   }
 
   @Delete(':id/authors/:authorId')
+  @Roles(UserRole.ADMIN)
   removeAuthor(
     @Param('id', ParseIntPipe) id: number,
     @Param('authorId', ParseIntPipe) authorId: number,
@@ -105,7 +124,16 @@ export class BrandController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.brandService.remove(id);
+  }
+
+  @Get(':id')
+  findProfile(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.brandService.findProfile(id, request.user);
   }
 }

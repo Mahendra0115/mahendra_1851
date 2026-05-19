@@ -7,14 +7,16 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
+import { Article, ArticleStatus } from '../article/entities/article.entity';
 import { BrandAuthor } from '../brand-author/entities/brand-author.entity';
 import { AuthenticatedUser } from '../user/types/authenticated-user.type';
 import { User, UserRole } from '../user/entities/user.entity';
+import { BrandProfileQueryDto } from './dto/brand-profile-query.dto';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandProfileDto } from './dto/update-brand-profile.dto';
 import { UpdateBrandStatusDto } from './dto/update-brand-status.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
-import { Brand } from './entities/brand.entity';
+import { Brand, BrandStatus } from './entities/brand.entity';
 
 @Injectable()
 export class BrandService {
@@ -25,6 +27,8 @@ export class BrandService {
     private readonly userRepository: Repository<User>,
     @InjectRepository(BrandAuthor)
     private readonly brandAuthorRepository: Repository<BrandAuthor>,
+    @InjectRepository(Article)
+    private readonly articleRepository: Repository<Article>,
   ) {}
 
   async create(createBrandDto: CreateBrandDto, adminUserId: number) {
@@ -36,10 +40,68 @@ export class BrandService {
     return this.brandRepository.save(brand);
   }
 
-  findAll() {
-    return this.brandRepository.find({
-      order: { id: 'ASC' },
+  async findAll(query: BrandProfileQueryDto, requester: AuthenticatedUser) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+
+    const queryBuilder = this.brandRepository
+      .createQueryBuilder('brand')
+      .orderBy('brand.id', 'ASC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (requester.role === UserRole.ADMIN && query.status) {
+      queryBuilder.where('brand.status = :status', { status: query.status });
+    } else if (requester.role !== UserRole.ADMIN) {
+      queryBuilder.where('brand.status = :status', {
+        status: BrandStatus.APPROVED,
+      });
+    }
+
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
+  }
+
+  async findProfile(id: number, requester: AuthenticatedUser) {
+    const brand = await this.findVisibleBrand(id, requester);
+    const publishedArticlesCount = await this.articleRepository.count({
+      where: { brandId: id, status: ArticleStatus.PUBLISHED },
     });
+
+    return {
+      ...brand,
+      publishedArticlesCount,
+    };
+  }
+
+  async findPublishedArticles(
+    id: number,
+    query: BrandProfileQueryDto,
+    requester: AuthenticatedUser,
+  ) {
+    await this.findVisibleBrand(id, requester);
+
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const [data, total] = await this.articleRepository.findAndCount({
+      where: { brandId: id, status: ArticleStatus.PUBLISHED },
+      order: { publishedAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
   async update(id: number, updateBrandDto: UpdateBrandDto) {
@@ -175,6 +237,19 @@ export class BrandService {
     });
 
     if (!brand) {
+      throw new NotFoundException('Brand not found');
+    }
+
+    return brand;
+  }
+
+  private async findVisibleBrand(id: number, requester: AuthenticatedUser) {
+    const brand = await this.findOne(id);
+
+    if (
+      brand.status === BrandStatus.DISAPPROVED &&
+      requester.role !== UserRole.ADMIN
+    ) {
       throw new NotFoundException('Brand not found');
     }
 

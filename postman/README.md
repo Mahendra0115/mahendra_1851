@@ -42,7 +42,7 @@ Role: ADMIN
 4. `04 POST /users/admin/users - Create Brand User`
 5. `05 POST /users/login - Brand Login`
 6. `06 POST /users/admin/users - Create User`
-7. `07 GET /brands - List All Brands`
+7. `07 GET /brands - List Brands Paginated`
 8. `08 PATCH /brands/:id - Update Brand`
 9. `09 PATCH /brands/:id/status - Update Brand Status`
 10. `10 DELETE /brands/:id - Delete Brand`
@@ -65,6 +65,8 @@ Role: ADMIN
 27. `27 GET /articles/published - Brand Own Published Articles`
 28. `28 PATCH /articles/:id/status - Admin Move Article Back To Draft`
 29. `29 GET /public/articles/:id - Draft Article Returns 404`
+30. `30 GET /brands/:id - Brand Profile`
+31. `31 GET /brands/:id/articles - Brand Published Articles`
 
 ---
 
@@ -221,32 +223,46 @@ Expected behavior:
 
 ---
 
-### 06. Admin List All Brands
+### 07. List Brands Paginated
 
 ```http
-GET {{baseUrl}}/brands
+GET {{baseUrl}}/brands?page={{page}}&limit={{limit}}
+Authorization: Bearer {{adminAccessToken}}
+```
+
+Admin status filters:
+
+```http
+GET {{baseUrl}}/brands?page={{page}}&limit={{limit}}&status=APPROVED
+Authorization: Bearer {{adminAccessToken}}
+```
+
+```http
+GET {{baseUrl}}/brands?page={{page}}&limit={{limit}}&status=DISAPPROVED
 Authorization: Bearer {{adminAccessToken}}
 ```
 
 Expected output:
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "Nike",
-    "description": "Sportswear brand",
-    "logoUrl": "https://example.com/nike-logo.png",
-    "createdById": 1,
-    "createdAt": "2026-05-11T10:00:00.000Z",
-    "updatedAt": "2026-05-11T10:00:00.000Z"
-  }
-]
+{
+  "data": [],
+  "total": 0,
+  "totalPages": 0,
+  "currentPage": 1
+}
 ```
+
+Rules:
+
+- Valid JWT token is required
+- Admin can see `APPROVED` and `DISAPPROVED` brands
+- Admin can filter with `status=APPROVED` or `status=DISAPPROVED`
+- Non-admin users can see only `APPROVED` brands
 
 ---
 
-### 07. Admin Update Brand
+### 08. Admin Update Brand
 
 ```http
 PATCH {{baseUrl}}/brands/{{brandId}}
@@ -774,6 +790,66 @@ GET {{baseUrl}}/public/articles/{{articleId}}
 Expected behavior:
 
 - Returns `404` after the article is moved back to `DRAFT`
+
+---
+
+## Task 7 Brand Profile Page APIs
+
+All Task 7 APIs require a valid JWT token. Missing or invalid tokens return `401 Unauthorized`.
+
+### 30. Brand Profile
+
+```http
+GET {{baseUrl}}/brands/{{brandId}}
+Authorization: Bearer {{accessToken}}
+```
+
+Expected response:
+
+```json
+{
+  "id": 1,
+  "name": "Nike",
+  "description": "Sportswear brand",
+  "logoUrl": "https://example.com/nike-logo.png",
+  "status": "APPROVED",
+  "createdById": 1,
+  "createdAt": "...",
+  "updatedAt": "...",
+  "publishedArticlesCount": 1
+}
+```
+
+Rules:
+
+- Returns `404` if brand does not exist
+- Returns `404` if brand is `DISAPPROVED` and requester is not `ADMIN`
+
+---
+
+### 31. Brand Published Articles
+
+```http
+GET {{baseUrl}}/brands/{{brandId}}/articles?page={{page}}&limit={{limit}}
+Authorization: Bearer {{accessToken}}
+```
+
+Expected response format:
+
+```json
+{
+  "data": [],
+  "total": 0,
+  "totalPages": 0,
+  "currentPage": 1
+}
+```
+
+Rules:
+
+- Returns only `PUBLISHED` articles for the selected brand
+- Returns `404` if brand does not exist
+- Returns `404` if brand is `DISAPPROVED` and requester is not `ADMIN`
 
 ---
 
