@@ -8,6 +8,7 @@ Import the following files into Postman:
 
 - `postman/mahendra_1851.postman_collection.json`
 - `postman/mahendra_1851.local.postman_environment.json`
+- `postman/public_article_feed_search.postman_collection.json` for only the Public Article Feed & Search task
 
 After importing, select the `mahendra_1851 Local` environment from the environment dropdown.
 
@@ -51,15 +52,19 @@ Role: ADMIN
 14. `14 POST /users/admin/users - Task 5 Create Author User`
 15. `15 POST /users/login - Task 5 Author Login`
 16. `16 POST /brands/:id/authors - Assign Author To Brand`
-17. `17 GET /brands/:id/authors - List Brand Authors`
-18. `18 POST /articles - Brand Create Article`
-19. `19 GET /articles - Brand List Own Brand Articles`
-20. `20 PATCH /articles/:id - Brand Update Article`
-21. `21 POST /articles - Author Create Article`
-22. `22 GET /articles - Author List Own Articles`
-23. `23 PATCH /articles/:id - Author Update Own Article`
-24. `24 DELETE /articles/:id - Author Delete Own Article`
-25. `25 DELETE /brands/:id/authors/:authorId - Remove Author From Brand`
+17. `17 POST /articles - Create Article`
+18. `18 GET /articles - List Articles`
+19. `19 PATCH /articles/:id - Update Article`
+20. `20 DELETE /articles/:id - Delete Article`
+21. `21 DELETE /brands/:id/authors/:authorId - Remove Author From Brand`
+22. `22 PATCH /articles/:id/status - Admin Publish Article`
+23. `23 GET /public/articles - Public Published Article Feed`
+24. `24 GET /public/articles/:id - Public Single Published Article`
+25. `25 GET /public/articles/search - Public Article Search`
+26. `26 GET /public/articles/brand/:brandId - Public Brand Article Filter`
+27. `27 GET /articles/published - Brand Own Published Articles`
+28. `28 PATCH /articles/:id/status - Admin Move Article Back To Draft`
+29. `29 GET /public/articles/:id - Draft Article Returns 404`
 
 ---
 
@@ -385,11 +390,14 @@ Expected behavior:
 
 ## Task 5 APIs
 
+Task 5 APIs collection me request number 14 se 21 tak add ki gayi hain.
+
 Important:
 
 - Run migration before testing: `npm run migration:run`
-- For Task 5 flow, run setup requests `02`, `03`, `04`, `05`, `14`, `15`, then run `16` to `25`
+- For Task 5 flow, run setup requests `02`, `03`, `04`, `05`, `14`, `15`, then run `16` to `21`
 - Skip `10 DELETE /brands/:id` until the end, because Task 5 needs the brand to exist
+- Same URL ko brand/author ke liye duplicate request ke form me repeat nahi kiya gaya; token/body change karke same API both roles ke liye test ho sakti hai
 
 ### 14. Task 5 Create Author User
 
@@ -403,9 +411,9 @@ Body:
 
 ```json
 {
-  "email": "{{authorEmail}}",
-  "password": "{{authorPassword}}",
-  "fullName": "{{authorFullName}}",
+  "email": "bob.author@example.com",
+  "password": "author1234",
+  "fullName": "Bob Author",
   "role": "AUTHOR"
 }
 ```
@@ -437,8 +445,8 @@ Body:
 
 ```json
 {
-  "email": "{{authorEmail}}",
-  "password": "{{authorPassword}}"
+  "email": "bob.author@example.com",
+  "password": "author1234"
 }
 ```
 
@@ -489,35 +497,9 @@ Expected output:
 
 ---
 
-### 17. List Brand Authors
+### 17. Create Article
 
-```http
-GET {{baseUrl}}/brands/{{brandId}}/authors
-Authorization: Bearer {{adminAccessToken}}
-```
-
-Expected output:
-
-```json
-[
-  {
-    "id": 1,
-    "brandId": 1,
-    "authorId": 3,
-    "author": {
-      "id": 3,
-      "email": "bob.author@example.com",
-      "role": "AUTHOR",
-      "brandId": null,
-      "fullName": "Bob Author"
-    }
-  }
-]
-```
-
----
-
-### 18. Brand Create Article
+Brand token se test karne ke liye `brandId` body me mat bhejo. Author token se test karne ke liye same API me `"brandId": {{brandId}}` add karo.
 
 ```http
 POST {{baseUrl}}/articles
@@ -529,8 +511,8 @@ Body:
 
 ```json
 {
-  "title": "{{articleTitle}}",
-  "content": "{{articleContent}}"
+  "title": "Task 5 Article",
+  "content": "This article is created for Task 5 testing."
 }
 ```
 
@@ -539,8 +521,8 @@ Expected output:
 ```json
 {
   "id": 1,
-  "title": "Nike New Launch",
-  "content": "Nike launched a new product.",
+  "title": "Task 5 Article",
+  "content": "This article is created for Task 5 testing.",
   "brandId": 1,
   "authorId": 2,
   "createdAt": "...",
@@ -552,7 +534,9 @@ Postman saves `articleId`.
 
 ---
 
-### 19. Brand List Own Brand Articles
+### 18. List Articles
+
+Brand token se apne brand ke articles milenge; author token se apne written articles milenge.
 
 ```http
 GET {{baseUrl}}/articles
@@ -565,8 +549,8 @@ Expected output:
 [
   {
     "id": 1,
-    "title": "Nike New Launch",
-    "content": "Nike launched a new product.",
+    "title": "Task 5 Article",
+    "content": "This article is created for Task 5 testing.",
     "brandId": 1,
     "authorId": 2
   }
@@ -575,7 +559,9 @@ Expected output:
 
 ---
 
-### 20. Brand Update Article
+### 19. Update Article
+
+Brand token se own brand article update hoga; author token se sirf own article update hoga.
 
 ```http
 PATCH {{baseUrl}}/articles/{{articleId}}
@@ -587,8 +573,8 @@ Body:
 
 ```json
 {
-  "title": "{{updatedArticleTitle}}",
-  "content": "{{updatedArticleContent}}"
+  "title": "Updated Task 5 Article",
+  "content": "This article is updated for Task 5 testing."
 }
 ```
 
@@ -597,8 +583,8 @@ Expected output:
 ```json
 {
   "id": 1,
-  "title": "Nike Updated Launch",
-  "content": "Updated by brand user.",
+  "title": "Updated Task 5 Article",
+  "content": "This article is updated for Task 5 testing.",
   "brandId": 1,
   "authorId": 2
 }
@@ -606,101 +592,13 @@ Expected output:
 
 ---
 
-### 21. Author Create Article
+### 20. Delete Article
+
+Brand token se own brand article delete hoga; author token se sirf own article delete hoga.
 
 ```http
-POST {{baseUrl}}/articles
-Authorization: Bearer {{authorAccessToken}}
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "title": "{{authorArticleTitle}}",
-  "content": "{{authorArticleContent}}",
-  "brandId": {{brandId}}
-}
-```
-
-Expected output:
-
-```json
-{
-  "id": 2,
-  "title": "Bob Article",
-  "content": "This article is written by Bob for Nike.",
-  "brandId": 1,
-  "authorId": 3,
-  "createdAt": "...",
-  "updatedAt": "..."
-}
-```
-
-Postman saves `authorArticleId`.
-
----
-
-### 22. Author List Own Articles
-
-```http
-GET {{baseUrl}}/articles
-Authorization: Bearer {{authorAccessToken}}
-```
-
-Expected output:
-
-```json
-[
-  {
-    "id": 2,
-    "title": "Bob Article",
-    "content": "This article is written by Bob for Nike.",
-    "brandId": 1,
-    "authorId": 3
-  }
-]
-```
-
----
-
-### 23. Author Update Own Article
-
-```http
-PATCH {{baseUrl}}/articles/{{authorArticleId}}
-Authorization: Bearer {{authorAccessToken}}
-Content-Type: application/json
-```
-
-Body:
-
-```json
-{
-  "title": "{{updatedAuthorArticleTitle}}",
-  "content": "{{updatedAuthorArticleContent}}"
-}
-```
-
-Expected output:
-
-```json
-{
-  "id": 2,
-  "title": "Bob Updated Article",
-  "content": "Bob updated his own article.",
-  "brandId": 1,
-  "authorId": 3
-}
-```
-
----
-
-### 24. Author Delete Own Article
-
-```http
-DELETE {{baseUrl}}/articles/{{authorArticleId}}
-Authorization: Bearer {{authorAccessToken}}
+DELETE {{baseUrl}}/articles/{{articleId}}
+Authorization: Bearer {{accessToken}}
 ```
 
 Expected output:
@@ -713,7 +611,7 @@ Expected output:
 
 ---
 
-### 25. Remove Author From Brand
+### 21. Remove Author From Brand
 
 ```http
 DELETE {{baseUrl}}/brands/{{brandId}}/authors/{{authorId}}
@@ -730,6 +628,155 @@ Expected output:
 
 ---
 
+## Public Article Feed & Search Task APIs
+
+Use `postman/public_article_feed_search.postman_collection.json` if you want to test only this task. Before running it, make sure these environment variables are set by the main collection or manually:
+
+- `adminAccessToken`
+- `accessToken`
+- `brandId`
+- `articleId`
+- `page`, `limit`, `sortBy`, `order`
+- `articleSearchQuery`
+
+### 22. Admin Publish Article
+
+```http
+PATCH {{baseUrl}}/articles/{{articleId}}/status
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "status": "PUBLISHED"
+}
+```
+
+Expected behavior:
+
+- Article `status` becomes `PUBLISHED`
+- `publishedAt` is automatically set
+
+---
+
+### 23. Public Published Article Feed
+
+```http
+GET {{baseUrl}}/public/articles?page={{page}}&limit={{limit}}&sortBy={{sortBy}}&order={{order}}
+```
+
+Supported query params:
+
+- `page`
+- `limit`
+- `sortBy`: `createdAt` or `publishedAt`
+- `order`: `asc` or `desc`
+
+Expected response format:
+
+```json
+{
+  "data": [],
+  "total": 0,
+  "totalPages": 0,
+  "currentPage": 1
+}
+```
+
+---
+
+### 24. Public Single Published Article
+
+```http
+GET {{baseUrl}}/public/articles/{{articleId}}
+```
+
+Expected behavior:
+
+- Returns article only if status is `PUBLISHED`
+- Returns `404` if article is not published
+
+---
+
+### 25. Public Article Search
+
+```http
+GET {{baseUrl}}/public/articles/search?query={{articleSearchQuery}}&page={{page}}&limit={{limit}}&sortBy={{sortBy}}&order={{order}}
+```
+
+Expected behavior:
+
+- Searches by `title` or `content`
+- Returns only `PUBLISHED` articles
+- Uses the same pagination response format
+
+---
+
+### 26. Public Brand Article Filter
+
+```http
+GET {{baseUrl}}/public/articles/brand/{{brandId}}?page={{page}}&limit={{limit}}&sortBy={{sortBy}}&order={{order}}
+```
+
+Expected behavior:
+
+- Returns only `PUBLISHED` articles for the selected brand
+- Uses the same pagination response format
+
+---
+
+### 27. Brand Own Published Articles
+
+```http
+GET {{baseUrl}}/articles/published?page={{page}}&limit={{limit}}&sortBy={{sortBy}}&order={{order}}
+Authorization: Bearer {{accessToken}}
+```
+
+Expected behavior:
+
+- Brand user can list only their own brand's `PUBLISHED` articles
+- Uses the same pagination response format
+
+---
+
+### 28. Admin Move Article Back To Draft
+
+```http
+PATCH {{baseUrl}}/articles/{{articleId}}/status
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "status": "DRAFT"
+}
+```
+
+Expected behavior:
+
+- Article `status` becomes `DRAFT`
+- `publishedAt` is cleared
+
+---
+
+### 29. Draft Article Returns 404
+
+```http
+GET {{baseUrl}}/public/articles/{{articleId}}
+```
+
+Expected behavior:
+
+- Returns `404` after the article is moved back to `DRAFT`
+
+---
+
 ## Important Notes
 
 - `{{baseUrl}}` default value: `http://localhost:3000`
@@ -737,7 +784,7 @@ Expected output:
 - `{{adminAccessToken}}` is automatically saved after admin login
 - `{{authorAccessToken}}` is automatically saved after author login
 - `{{brandId}}` is automatically saved after brand creation
-- `{{articleId}}` and `{{authorArticleId}}` are automatically saved after article creation
+- `{{articleId}}` is automatically saved after article creation
 - Admin-only APIs return `403 Forbidden` for normal brand users
 - Running migrations is required because `synchronize` is set to `false`
 - Brand user credentials are automatically emailed during creation

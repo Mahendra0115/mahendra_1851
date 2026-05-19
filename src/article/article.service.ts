@@ -5,14 +5,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { BrandAuthor } from '../brand-author/entities/brand-author.entity';
 import { Brand } from '../brand/entities/brand.entity';
 import { AuthenticatedUser } from '../user/types/authenticated-user.type';
 import { UserRole } from '../user/entities/user.entity';
+import {
+  ArticleListQueryDto,
+  ArticleSearchQueryDto,
+} from './dto/article-query.dto';
 import { CreateArticleDto } from './dto/create-article.dto';
+import { UpdateArticleStatusDto } from './dto/update-article-status.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
-import { Article } from './entities/article.entity';
+import { Article, ArticleStatus } from './entities/article.entity';
 
 @Injectable()
 export class ArticleService {
@@ -70,6 +75,41 @@ export class ArticleService {
     );
   }
 
+  findPublished(query: ArticleListQueryDto, brandId?: number) {
+    return this.findPublishedArticles(query, { brandId });
+  }
+
+  async findPublishedById(id: number) {
+    const article = await this.articleRepository.findOne({
+      where: { id, status: ArticleStatus.PUBLISHED },
+    });
+
+    if (!article) {
+      throw new NotFoundException('Article not found');
+    }
+
+    return article;
+  }
+
+  searchPublished(query: ArticleSearchQueryDto) {
+    return this.findPublishedArticles(query, { search: query.query });
+  }
+
+  async findMyPublished(
+    query: ArticleListQueryDto,
+    requester: AuthenticatedUser,
+  ) {
+    if (requester.role !== UserRole.BRAND) {
+      throw new ForbiddenException('Only brand users can list brand articles');
+    }
+
+    if (!requester.brandId) {
+      throw new ForbiddenException('Brand account is not linked to a brand');
+    }
+
+    return this.findPublishedArticles(query, { brandId: requester.brandId });
+  }
+
   async update(
     id: number,
     updateArticleDto: UpdateArticleDto,
@@ -92,6 +132,73 @@ export class ArticleService {
     await this.articleRepository.remove(article);
 
     return { message: 'Article deleted successfully' };
+  }
+
+  async updateStatus(
+    id: number,
+    updateArticleStatusDto: UpdateArticleStatusDto,
+  ) {
+    const article = await this.findOne(id);
+
+    if (
+      updateArticleStatusDto.status === ArticleStatus.PUBLISHED &&
+      article.status !== ArticleStatus.PUBLISHED
+    ) {
+      article.publishedAt = new Date();
+    }
+
+    if (updateArticleStatusDto.status !== ArticleStatus.PUBLISHED) {
+      article.publishedAt = null;
+    }
+
+    article.status = updateArticleStatusDto.status;
+
+    return this.articleRepository.save(article);
+  }
+
+  private async findPublishedArticles(
+    query: ArticleListQueryDto,
+    filters: { brandId?: number; search?: string } = {},
+  ) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const sortBy = query.sortBy ?? 'publishedAt';
+    const order = query.order ?? 'desc';
+
+    const queryBuilder = this.articleRepository
+      .createQueryBuilder('article')
+      .where('article.status = :status', { status: ArticleStatus.PUBLISHED });
+
+    if (filters.brandId !== undefined) {
+      queryBuilder.andWhere('article.brandId = :brandId', {
+        brandId: filters.brandId,
+      });
+    }
+
+    if (filters.search) {
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where('article.title ILIKE :search', {
+            search: `%${filters.search}%`,
+          }).orWhere('article.content ILIKE :search', {
+            search: `%${filters.search}%`,
+          });
+        }),
+      );
+    }
+
+    const [data, total] = await queryBuilder
+      .orderBy(`article.${sortBy}`, order.toUpperCase() as 'ASC' | 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
   }
 
   private async resolveCreateBrandId(
