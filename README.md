@@ -25,6 +25,15 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Task 7 Brand Profile APIs
+
+All Task 7 APIs require `Authorization: Bearer <JWT>`.
+
+- `GET /brands?page=1&limit=10` lists brands with `{ data, total, totalPages, currentPage }`; admins see all brands, non-admin users see only `APPROVED` brands.
+- `GET /brands?page=1&limit=10&status=APPROVED` and `GET /brands?page=1&limit=10&status=DISAPPROVED` let admins filter brands by approval status.
+- `GET /brands/:id` returns brand details with `publishedArticlesCount`; non-admin users get `404` for `DISAPPROVED` or missing brands.
+- `GET /brands/:id/articles?page=1&limit=10` returns only published articles for that brand with pagination; non-admin users get `404` for `DISAPPROVED` or missing brands.
+
 ## Project setup
 
 ```bash

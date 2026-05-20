@@ -301,7 +301,7 @@
       "response": []
     },
     {
-      "name": "07 GET /brands - List All Brands",
+      "name": "07 GET /brands - List Brands Paginated",
       "event": [
         {
           "listen": "test",
@@ -310,8 +310,13 @@
               "pm.test('Status code is 200', function () {",
               "  pm.response.to.have.status(200);",
               "});",
-              "pm.test('Response is array', function () {",
-              "  pm.expect(pm.response.json()).to.be.an('array');",
+              "const json = pm.response.json();",
+              "pm.test('Response has pagination format', function () {",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.be.an('array');",
+              "  pm.expect(json).to.have.property('total');",
+              "  pm.expect(json).to.have.property('totalPages');",
+              "  pm.expect(json).to.have.property('currentPage');",
               "});"
             ],
             "type": "text/javascript"
@@ -332,12 +337,22 @@
         "method": "GET",
         "header": [],
         "url": {
-          "raw": "{{baseUrl}}/brands",
+          "raw": "{{baseUrl}}/brands?page={{page}}&limit={{limit}}",
           "host": [
             "{{baseUrl}}"
           ],
           "path": [
             "brands"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "{{page}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}"
+            }
           ]
         }
       },
@@ -1310,6 +1325,112 @@
             {
               "key": "order",
               "value": "{{order}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "30 GET /brands/:id - Brand Profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Brand profile includes published article count', function () {",
+              "  pm.expect(json.id).to.eql(Number(pm.environment.get('brandId')));",
+              "  pm.expect(json).to.have.property('publishedArticlesCount');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "31 GET /brands/:id/articles - Brand Published Articles",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test('Response has pagination format', function () {",
+              "  pm.expect(json).to.have.property('data');",
+              "  pm.expect(json.data).to.be.an('array');",
+              "  pm.expect(json).to.have.property('total');",
+              "  pm.expect(json).to.have.property('totalPages');",
+              "  pm.expect(json).to.have.property('currentPage');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/brands/{{brandId}}/articles?page={{page}}&limit={{limit}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "{{brandId}}",
+            "articles"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "{{page}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}"
             }
           ]
         }
