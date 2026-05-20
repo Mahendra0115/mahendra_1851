@@ -108,10 +108,22 @@ export class BrandController {
     return this.brandService.assignAuthor(id, assignAuthorDto.authorId);
   }
 
+  @Get('me/authors')
+  @Roles(UserRole.BRAND)
+  findOwnAuthors(
+    @Query() query: BrandProfileQueryDto,
+    @Req() request: AuthenticatedRequest,
+  ) {
+    return this.brandService.findOwnAuthors(query, request.user);
+  }
+
   @Get(':id/authors')
   @Roles(UserRole.ADMIN)
-  findAuthors(@Param('id', ParseIntPipe) id: number) {
-    return this.brandService.findAuthors(id);
+  findAuthors(
+    @Param('id', ParseIntPipe) id: number,
+    @Query() query: BrandProfileQueryDto,
+  ) {
+    return this.brandService.findAuthors(id, query);
   }
 
   @Delete(':id/authors/:authorId')

@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   Logger,
   NotFoundException,
@@ -77,7 +76,7 @@ export class UserService implements OnModuleInit {
     });
 
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new BadRequestException('Email already exists');
     }
 
     const user = this.userRepository.create({

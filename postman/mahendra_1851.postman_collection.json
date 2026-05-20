@@ -1436,6 +1436,376 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "32 POST /authors - Create Author",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test(\"Author created with AUTHOR role\", function () {",
+              "  pm.expect(json).to.have.property(\"id\");",
+              "  pm.expect(json.role).to.eql(\"AUTHOR\");",
+              "  pm.expect(json.brandId).to.eql(null);",
+              "});",
+              "if (json.id) { pm.environment.set(\"authorId\", json.id); }"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{authorFullName}}\",\n  \"email\": \"{{authorEmail}}\",\n  \"password\": \"{{authorPassword}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/authors",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "authors"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "33 GET /authors - List Authors Paginated",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test(\"Response has pagination format\", function () {",
+              "  pm.expect(json).to.have.property(\"data\");",
+              "  pm.expect(json.data).to.be.an(\"array\");",
+              "  pm.expect(json).to.have.property(\"total\");",
+              "  pm.expect(json).to.have.property(\"totalPages\");",
+              "  pm.expect(json).to.have.property(\"currentPage\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/authors?page={{page}}&limit={{limit}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "authors"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "{{page}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "34 GET /authors/:id - Get Author By Id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test(\"Author profile includes assigned brands\", function () {",
+              "  pm.expect(json.id).to.eql(Number(pm.environment.get(\"authorId\")));",
+              "  pm.expect(json.role).to.eql(\"AUTHOR\");",
+              "  pm.expect(json).to.have.property(\"brands\");",
+              "  pm.expect(json.brands).to.be.an(\"array\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/authors/{{authorId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "authors",
+            "{{authorId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "35 GET /brands/me/authors - Brand Own Authors Paginated",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test(\"Response has pagination format\", function () {",
+              "  pm.expect(json).to.have.property(\"data\");",
+              "  pm.expect(json.data).to.be.an(\"array\");",
+              "  pm.expect(json).to.have.property(\"total\");",
+              "  pm.expect(json).to.have.property(\"totalPages\");",
+              "  pm.expect(json).to.have.property(\"currentPage\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{accessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/brands/me/authors?page={{page}}&limit={{limit}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "brands",
+            "me",
+            "authors"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "{{page}}"
+            },
+            {
+              "key": "limit",
+              "value": "{{limit}}"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "36 GET /authors/me - Author Own Profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test(\"Own profile belongs to an author\", function () {",
+              "  pm.expect(json.role).to.eql(\"AUTHOR\");",
+              "  pm.expect(json).to.have.property(\"brands\");",
+              "  pm.expect(json.brands).to.be.an(\"array\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{authorAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/authors/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "authors",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "37 PATCH /authors/me - Update Author Own Profile",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test(\"Author profile updated without changing role or brandId\", function () {",
+              "  pm.expect(json.role).to.eql(\"AUTHOR\");",
+              "  pm.expect(json.brandId).to.eql(null);",
+              "  pm.expect(json.name).to.eql(\"{{authorFullName}} Updated\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{authorAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"{{authorFullName}} Updated\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/authors/me",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "authors",
+            "me"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "38 DELETE /authors/:id - Delete Author",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const json = pm.response.json();",
+              "pm.test(\"Author deleted\", function () {",
+              "  pm.expect(json).to.have.property(\"message\");",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{adminAccessToken}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/authors/{{authorId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "authors",
+            "{{authorId}}"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "auth": {

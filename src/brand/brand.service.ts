@@ -1,5 +1,5 @@
 import {
-  ConflictException,
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -191,7 +191,7 @@ export class BrandService {
     });
 
     if (existingAssignment) {
-      return existingAssignment;
+      throw new BadRequestException('Author is already assigned to this brand');
     }
 
     const assignment = this.brandAuthorRepository.create({ brandId, authorId });
@@ -199,31 +199,59 @@ export class BrandService {
     return this.brandAuthorRepository.save(assignment);
   }
 
-  async findAuthors(brandId: number) {
+  async findAuthors(brandId: number, query: BrandProfileQueryDto) {
     await this.findOne(brandId);
 
-    const assignments = await this.brandAuthorRepository.find({
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const [assignments, total] = await this.brandAuthorRepository.findAndCount({
       where: { brandId },
       relations: { author: true },
       order: { id: 'ASC' },
+      skip: (page - 1) * limit,
+      take: limit,
     });
 
-    return assignments.map((assignment) => ({
-      id: assignment.id,
-      brandId: assignment.brandId,
-      authorId: assignment.authorId,
-      createdAt: assignment.createdAt,
-      author: this.serializeUser(assignment.author),
-    }));
+    return {
+      data: assignments.map((assignment) =>
+        this.serializeUser(assignment.author),
+      ),
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+    };
+  }
+
+  async findOwnAuthors(
+    query: BrandProfileQueryDto,
+    requester: AuthenticatedUser,
+  ) {
+    if (requester.role !== UserRole.BRAND || !requester.brandId) {
+      throw new ForbiddenException(
+        'You can list authors only for your own brand',
+      );
+    }
+
+    return this.findAuthors(requester.brandId, query);
   }
 
   async removeAuthor(brandId: number, authorId: number) {
+    await this.findOne(brandId);
+
+    const author = await this.userRepository.findOne({
+      where: { id: authorId, role: UserRole.AUTHOR },
+    });
+
+    if (!author) {
+      throw new NotFoundException('Author user not found');
+    }
+
     const assignment = await this.brandAuthorRepository.findOne({
       where: { brandId, authorId },
     });
 
     if (!assignment) {
-      throw new NotFoundException('Brand author assignment not found');
+      throw new BadRequestException('Author is not assigned to this brand');
     }
 
     await this.brandAuthorRepository.remove(assignment);
@@ -332,7 +360,7 @@ export class BrandService {
       });
 
       if (existingUser && existingUser.id !== user.id) {
-        throw new ConflictException('Email already exists');
+        throw new BadRequestException('Email already exists');
       }
 
       user.email = updateBrandProfileDto.email;
