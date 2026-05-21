@@ -7,6 +7,7 @@ This README provides the correct numbered order for testing APIs in Postman.
 Import the following files into Postman:
 
 - `postman/mahendra_1851.postman_collection.json`
+- `postman/task_8_author_management.postman_collection.json` for only Task 8 Author Management testing
 - `postman/mahendra_1851.local.postman_environment.json`
 - `postman/public_article_feed_search.postman_collection.json` for only the Public Article Feed & Search task
 
@@ -67,6 +68,13 @@ Role: ADMIN
 29. `29 GET /public/articles/:id - Draft Article Returns 404`
 30. `30 GET /brands/:id - Brand Profile`
 31. `31 GET /brands/:id/articles - Brand Published Articles`
+32. `32 POST /authors - Create Author`
+33. `33 GET /authors - List Authors Paginated`
+34. `34 GET /authors/:id - Get Author By Id`
+35. `35 GET /brands/me/authors - Brand Own Authors Paginated`
+36. `36 GET /authors/me - Author Own Profile`
+37. `37 PATCH /authors/me - Update Author Own Profile`
+38. `38 DELETE /authors/:id - Delete Author`
 
 ---
 
@@ -850,6 +858,188 @@ Rules:
 - Returns only `PUBLISHED` articles for the selected brand
 - Returns `404` if brand does not exist
 - Returns `404` if brand is `DISAPPROVED` and requester is not `ADMIN`
+
+---
+
+## Task 8 Author Management APIs
+
+All Task 8 APIs require a valid JWT token. Missing or invalid tokens return `401 Unauthorized`.
+
+For focused Task 8 testing, import `postman/task_8_author_management.postman_collection.json` and run requests in this order:
+
+1. `01 GET / - Health`
+2. `02 POST /users/login - Seed Admin Login`
+3. `03 POST /brands - Create Brand`
+4. `04 POST /users/admin/users - Create Brand User`
+5. `05 POST /users/login - Brand Login`
+6. `06 NEW POST /authors - Create Author`
+7. `07 NEW POST /users/login - Author Login`
+8. `08 NEW POST /brands/:id/authors - Assign Author To Brand`
+9. `09 NEW GET /authors - List Authors Paginated`
+10. `10 NEW GET /authors/:id - Get Author By Id`
+11. `11 NEW GET /brands/me/authors - Brand Own Authors Paginated`
+12. `12 NEW GET /authors/me - Author Own Profile`
+13. `13 NEW PATCH /authors/me - Update Author Own Profile`
+14. `14 NEW DELETE /brands/:id/authors/:authorId - Unassign Author From Brand`
+15. `15 NEW POST /brands/:id/authors - Reassign Author Before Delete`
+16. `16 NEW DELETE /authors/:id - Delete Author`
+
+In this focused collection, new API request bodies use generated collection variables such as `task8AuthorEmail`; they do not read author body values from the environment.
+
+### 32. Create Author
+
+Only `ADMIN` users can create authors.
+
+```http
+POST {{baseUrl}}/authors
+Authorization: Bearer {{adminAccessToken}}
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "name": "{{authorFullName}}",
+  "email": "{{authorEmail}}",
+  "password": "{{authorPassword}}"
+}
+```
+
+Expected behavior:
+
+- Creates a user with `role: AUTHOR`
+- `brandId` remains `null`
+- Sends login credentials to the author by email
+- Postman saves `authorId`
+- Duplicate email returns `400`
+
+---
+
+### 33. List Authors Paginated
+
+Only `ADMIN` users can list all authors.
+
+```http
+GET {{baseUrl}}/authors?page={{page}}&limit={{limit}}
+Authorization: Bearer {{adminAccessToken}}
+```
+
+Expected response format:
+
+```json
+{
+  "data": [],
+  "total": 0,
+  "totalPages": 0,
+  "currentPage": 1
+}
+```
+
+---
+
+### 34. Get Author By Id
+
+Only `ADMIN` users can get an author by id.
+
+```http
+GET {{baseUrl}}/authors/{{authorId}}
+Authorization: Bearer {{adminAccessToken}}
+```
+
+Expected behavior:
+
+- Returns author details
+- Includes assigned brands list
+- Returns `404` if author does not exist
+
+---
+
+### 35. Brand Own Authors Paginated
+
+Only `BRAND` users can list authors assigned to their own brand.
+
+```http
+GET {{baseUrl}}/brands/me/authors?page={{page}}&limit={{limit}}
+Authorization: Bearer {{accessToken}}
+```
+
+Expected response format:
+
+```json
+{
+  "data": [],
+  "total": 0,
+  "totalPages": 0,
+  "currentPage": 1
+}
+```
+
+Rules:
+
+- Brand users can see only authors assigned to their own brand
+- Non-brand users get `403`
+
+---
+
+### 36. Author Own Profile
+
+Only `AUTHOR` users can view their own profile.
+
+```http
+GET {{baseUrl}}/authors/me
+Authorization: Bearer {{authorAccessToken}}
+```
+
+Expected behavior:
+
+- Returns logged-in author details
+- Includes assigned brands list
+- Non-author users get `403`
+
+---
+
+### 37. Update Author Own Profile
+
+Only `AUTHOR` users can update their own profile.
+
+```http
+PATCH {{baseUrl}}/authors/me
+Authorization: Bearer {{authorAccessToken}}
+Content-Type: application/json
+```
+
+Body:
+
+```json
+{
+  "name": "{{authorFullName}} Updated"
+}
+```
+
+Rules:
+
+- Author can update only `name`, `email`, and `password`
+- `role` and `brandId` cannot be updated
+- Duplicate email returns `400`
+- Non-author users get `403`
+
+---
+
+### 38. Delete Author
+
+Only `ADMIN` users can delete authors.
+
+```http
+DELETE {{baseUrl}}/authors/{{authorId}}
+Authorization: Bearer {{adminAccessToken}}
+```
+
+Expected behavior:
+
+- Deletes the author
+- Removes all `BrandAuthor` assignments for that author
+- Returns `404` if author does not exist
 
 ---
 
